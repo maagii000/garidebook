@@ -14,6 +14,14 @@ interface PayState {
   shortUrl?: string;
 }
 
+interface TransferState {
+  paymentId: string;
+  cash: number;
+  creditUsed: number;
+  bank: { bankName: string; account: string; receiver: string };
+  ref: string;
+}
+
 export default function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -21,7 +29,9 @@ export default function CheckoutPage() {
   const book = books.find((b) => b.id === id);
   const [use, setUse] = useState(100);
   const [busy, setBusy] = useState(false);
+  const [method, setMethod] = useState<"qpay" | "transfer">("qpay");
   const [pay, setPay] = useState<PayState | null>(null);
+  const [transfer, setTransfer] = useState<TransferState | null>(null);
   const [paid, setPaid] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -51,13 +61,29 @@ export default function CheckoutPage() {
       const r = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookId: book!.id, creditToUse: clamped }),
+        body: JSON.stringify({ bookId: book!.id, creditToUse: clamped, method }),
       });
       const d = await r.json();
       if (!r.ok) { notify(d.error || "Төлбөр үүсгэхэд алдаа", "err"); return; }
       if (d.paid || d.owned) {
         setPaid(true);
         refreshAll();
+        return;
+      }
+      if (d.transfer) {
+        setTransfer(d);
+        // Poll admin confirmation
+        pollRef.current = setInterval(async () => {
+          try {
+            const s = await fetch(`/api/payments/${d.paymentId}`).then((x) => x.json());
+            if (s.status === "PAID") {
+              if (pollRef.current) clearInterval(pollRef.current);
+              setPaid(true);
+              refreshAll();
+              notify("Төлбөр баталгаажлаа ✓");
+            }
+          } catch { /* keep polling */ }
+        }, 8000);
         return;
       }
       setPay(d);
@@ -94,6 +120,46 @@ export default function CheckoutPage() {
             🤖 AI-аас асуух
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  if (transfer) {
+    const copy = (t: string) => {
+      navigator.clipboard?.writeText(t).then(
+        () => notify("Хууллаа ✓"),
+        () => notify("Хуулах үед алдаа", "err")
+      );
+    };
+    return (
+      <div className="mx-auto max-w-md px-4 py-8">
+        <h1 className="text-xl font-extrabold text-navy text-center">Шилжүүлэг — {transfer.cash.toLocaleString()}₮</h1>
+        <div className="mt-5 rounded-3xl border bg-white p-6 space-y-3">
+          {([
+            ["Банк", transfer.bank.bankName],
+            ["Данс", transfer.bank.account],
+            ["Хүлээн авагч", transfer.bank.receiver],
+            ["Гүйлгээний утга", transfer.ref],
+            ["Дүн", `${transfer.cash.toLocaleString()}₮`],
+          ] as [string, string][]).map(([l, v]) => (
+            <div key={l} className="flex items-center justify-between gap-2 rounded-xl bg-paper border px-3.5 py-2.5 text-sm">
+              <span className="text-slate-500">{l}</span>
+              <span className="font-extrabold text-right break-all">{v}</span>
+              <button onClick={() => copy(v)} className="shrink-0 rounded-lg bg-navy-light px-2 py-1 text-xs font-bold text-navy">Хуулах</button>
+            </div>
+          ))}
+          <p className="text-xs text-slate-500 leading-5">
+            ⏳ Шилжүүлсний дараа админ баталгаажуулмагц ном нээгдэнэ (polling ажиллаж байна).
+            Гүйлгээний утгаа заавал бичнэ үү!
+          </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+            <span className="h-3 w-3 animate-ping rounded-full bg-sage" /> Баталгаажуулалт хүлээж байна...
+          </div>
+        </div>
+        <button onClick={() => { if (pollRef.current) clearInterval(pollRef.current); setTransfer(null); }}
+          className="mt-4 w-full text-sm text-slate-400 hover:underline">
+          Болих
+        </button>
       </div>
     );
   }
@@ -156,9 +222,24 @@ export default function CheckoutPage() {
           </div>
         </div>
 
+        <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-bold">
+          <button onClick={() => setMethod("qpay")}
+            className={`rounded-xl border px-4 py-3 ${method === "qpay" ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
+            📱 QPay QR
+          </button>
+          <button onClick={() => setMethod("transfer")}
+            className={`rounded-xl border px-4 py-3 ${method === "transfer" ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
+            🏦 Шилжүүлэг
+          </button>
+        </div>
+
         <button onClick={isEbook ? startQpay : submitPhysical} disabled={busy}
           className="mt-4 w-full rounded-xl bg-sage px-5 py-3.5 font-extrabold text-white hover:brightness-95 disabled:opacity-50">
-          {busy ? "Боловсруулж байна..." : isEbook ? `📱 QPay QR үүсгэх — ${cash.toLocaleString()}₮ + ${clamped} кр` : `✅ Захиалах — ${cash.toLocaleString()}₮ + ${clamped} кр`}
+          {busy ? "Боловсруулж байна..." : isEbook
+            ? method === "qpay"
+              ? `📱 QPay QR үүсгэх — ${cash.toLocaleString()}₮ + ${clamped} кр`
+              : `🏦 Шилжүүлэг эхлүүлэх — ${cash.toLocaleString()}₮ + ${clamped} кр`
+            : `✅ Захиалах — ${cash.toLocaleString()}₮ + ${clamped} кр`}
         </button>
         {isEbook && (
           <p className="mt-2 text-[11px] text-slate-400 text-center">

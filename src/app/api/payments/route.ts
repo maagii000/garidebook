@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireUser, unauthorized } from "@/lib/api-auth";
 import { createInvoice } from "@/lib/qpay";
 import { fulfillPayment, cashAfterCredit } from "@/lib/payments";
+import { bankInfo } from "@/lib/bank";
 import { MAX_CREDIT_USE_PER_ORDER } from "@/lib/types";
 
 function originOf(req: NextRequest) {
@@ -15,7 +16,7 @@ function originOf(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
-  const { bookId, creditToUse } = await req.json();
+  const { bookId, creditToUse, method } = await req.json();
 
   const book = await db.book.findUnique({ where: { id: bookId } });
   if (!book) return NextResponse.json({ error: "Ном олдсонгүй" }, { status: 404 });
@@ -30,14 +31,30 @@ export async function POST(req: NextRequest) {
   const { use, cash } = cashAfterCredit(book.priceCash, creditToUse, me.credit, allowed);
 
   const payment = await db.payment.create({
-    data: { buyerId: me.id, bookId, amount: cash, creditSpent: use, status: "PENDING" },
+    data: {
+      buyerId: me.id, bookId, amount: cash, creditSpent: use, status: "PENDING",
+      method: method === "transfer" ? "TRANSFER" : "QPAY",
+    },
   });
 
-  // Fully covered by credit → fulfill immediately (no QPay).
+  // Fully covered by credit → fulfill immediately (no payment provider).
   if (cash <= 0) {
     const done = await fulfillPayment(payment.id);
     const fresh = await db.user.findUnique({ where: { id: me.id }, select: { credit: true } });
     return NextResponse.json({ paid: true, orderId: done.orderId, credit: fresh?.credit ?? 0 });
+  }
+
+  // Manual bank transfer → admin confirms later.
+  if (method === "transfer") {
+    const bank = await bankInfo();
+    return NextResponse.json({
+      paymentId: payment.id,
+      cash,
+      creditUsed: use,
+      transfer: true,
+      bank,
+      ref: `GB-${payment.id.slice(0, 8).toUpperCase()}`,
+    });
   }
 
   const origin = originOf(req);

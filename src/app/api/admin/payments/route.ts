@@ -25,6 +25,7 @@ export async function GET() {
       amount: p.amount,
       creditSpent: p.creditSpent,
       status: p.status,
+      method: p.method,
       qpayInvoiceId: p.qpayInvoiceId,
       qpayPaymentId: p.qpayPaymentId,
       ebarimtId: p.ebarimtId,

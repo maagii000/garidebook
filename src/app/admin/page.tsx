@@ -9,7 +9,7 @@ type Tab = "books" | "add" | "payments" | "ai";
 interface PendingItem { id: string; title: string; author: string; ownerName: string; createdAt: string; }
 interface PayRow {
   id: string; bookTitle: string; buyer: string; amount: number; creditSpent: number;
-  status: string; qpayInvoiceId: string | null; qpayPaymentId: string | null;
+  status: string; method: string; qpayInvoiceId: string | null; qpayPaymentId: string | null;
   ebarimtId: string | null; orderId: string | null; createdAt: string;
 }
 
@@ -71,6 +71,31 @@ export default function AdminPage() {
     const d = await r.json();
     if (!r.ok) { notify(d.error || "Ebarimt алдаа", "err"); return; }
     notify("E-barimt үүслээ ✓");
+    load();
+  }
+
+  async function confirmPay(paymentId: string) {
+    if (!confirm("Шилжүүлэг орсныг баталгаажуулах уу? Ном нээгдэнэ.")) return;
+    const r = await fetch("/api/admin/payments/confirm", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentId }),
+    });
+    const d = await r.json();
+    if (!r.ok) { notify(d.error || "Алдаа", "err"); return; }
+    notify("Баталгаажлаа, ном нээгдлээ ✓");
+    load();
+    refreshAll();
+  }
+
+  async function cancelPay(paymentId: string) {
+    if (!confirm("Төлбөрийг цуцлах уу?")) return;
+    const r = await fetch("/api/admin/payments/cancel", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentId }),
+    });
+    const d = await r.json();
+    if (!r.ok) { notify(d.error || "Алдаа", "err"); return; }
+    notify("Цуцлагдлаа");
     load();
   }
 
@@ -305,7 +330,7 @@ export default function AdminPage() {
 
       {tab === "payments" && (
         <div className="mt-5 rounded-2xl border bg-white overflow-x-auto">
-          <table className="w-full text-sm min-w-[760px]">
+          <table className="w-full text-sm min-w-[820px]">
             <thead>
               <tr className="text-left text-xs text-slate-400 border-b">
                 <th className="p-3">Ном / Худалдан авагч</th>
@@ -321,16 +346,32 @@ export default function AdminPage() {
               )}
               {payments.map((p) => (
                 <tr key={p.id} className="border-b last:border-0">
-                  <td className="p-3 font-bold">{p.bookTitle}<div className="text-xs font-normal text-slate-400">{p.buyer}</div></td>
+                  <td className="p-3 font-bold">{p.bookTitle}
+                    <div className="text-xs font-normal text-slate-400">
+                      {p.buyer} • {p.method === "TRANSFER" ? "🏦 Шилжүүлэг" : "📱 QPay"}
+                    </div>
+                  </td>
                   <td className="p-3">{p.amount.toLocaleString()}₮ + {p.creditSpent}кр</td>
                   <td className="p-3 font-bold">{p.status}</td>
                   <td className="p-3 text-xs">{p.ebarimtId ? `✓ ${p.ebarimtId.slice(0, 8)}` : "—"}</td>
                   <td className="p-3">
-                    {p.status === "PAID" && !p.ebarimtId && p.qpayPaymentId && (
-                      <button onClick={() => ebarimtRetry(p.id)} className="rounded bg-accent-light px-2.5 py-1 text-xs font-bold text-accent-dark">
-                        🧾 Ebarimt дахин
-                      </button>
-                    )}
+                    <div className="flex gap-1.5 flex-wrap">
+                      {p.status === "PENDING" && p.method === "TRANSFER" && (
+                        <button onClick={() => confirmPay(p.id)} className="rounded bg-sage px-2.5 py-1 text-xs font-bold text-white">
+                          ✓ Баталгаажуулах
+                        </button>
+                      )}
+                      {p.status === "PENDING" && (
+                        <button onClick={() => cancelPay(p.id)} className="rounded bg-slate-100 px-2.5 py-1 text-xs font-bold">
+                          Цуцлах
+                        </button>
+                      )}
+                      {p.status === "PAID" && !p.ebarimtId && p.qpayPaymentId && (
+                        <button onClick={() => ebarimtRetry(p.id)} className="rounded bg-accent-light px-2.5 py-1 text-xs font-bold text-accent-dark">
+                          🧾 Ebarimt дахин
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -11,6 +11,8 @@ export async function syncPayment(paymentId: string) {
   });
   if (!payment) throw new Error("Төлбөр олдсонгүй");
   if (payment.status === "PAID") return payment;
+  // Manual bank transfer: only admin confirm fulfills (no QPay check).
+  if (payment.method === "TRANSFER") return payment;
   if (payment.status !== "PENDING" || !payment.qpayInvoiceId) return payment;
 
   const check = await checkInvoice(payment.qpayInvoiceId);
