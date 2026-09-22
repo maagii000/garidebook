@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------- NextAuth (v4) ----------
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------- Garidebook ----------
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Category {
+  children
+  fiction
+  textbook
+}
+
+enum Condition {
+  new
+  like_new
+  good
+  used
+}
+
+enum Source {
+  official
+  user
+}
+
+enum BookStatus {
+  pending
+  active
+  sold
+  rejected
+}
+
+enum OrderStatus {
+  placed
+  cancelled
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?
+  credit        Int       @default(120)
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  accounts      Account[]
+  sessions      Session[]
+  books         Book[]    @relation("BookOwner")
+  reviews       Review[]
+  wishlist      Wishlist[]
+  creditTxs     CreditTx[]
+  orders        Order[]   @relation("Buyer")
+}
+
+model Book {
+  id          String     @id @default(cuid())
+  title       String
+  author      String
+  category    Category
+  condition   Condition
+  description String     @default("")
+  source      Source     @default(user)
+  status      BookStatus @default(pending)
+  priceCash   Int        @default(5000)
+  ownerId     String
+  owner       User       @relation("BookOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  images      BookImage[]
+  avgRating   Float      @default(0)
+  reviewCount Int        @default(0)
+  createdAt   DateTime   @default(now())
+  reviews     Review[]
+  wishlisted  Wishlist[]
+  creditTxs   CreditTx[]
+  orders      Order[]
+
+  @@index([status, source])
+  @@index([category])
+}
+
+model BookImage {
+  id     String @id @default(cuid())
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  url    String
+  sort   Int    @default(0)
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  text      String
+  createdAt DateTime @default(now())
+
+  @@unique([bookId, userId])
+  @@index([bookId])
+}
+
+model Wishlist {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@id([userId, bookId])
+}
+
+model CreditTx {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  reason    String
+  bookId    String?
+  book      Book?    @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  bookId      String
+  book        Book        @relation(fields: [bookId], references: [id])
+  buyerId     String
+  buyer       User        @relation("Buyer", fields: [buyerId], references: [id])
+  cashPaid    Int
+  creditSpent Int
+  status      OrderStatus @default(placed)
+  createdAt   DateTime    @default(now())
+
+  @@index([buyerId])
+}
