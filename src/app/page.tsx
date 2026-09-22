@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useStore } from "@/lib/store";
 import BookRail from "@/components/BookRail";
 import { CREDIT_TO_MNT, MAX_CREDIT_USE_PER_ORDER } from "@/lib/types";
 
 export default function Home() {
   const { books, credit } = useStore();
+  const { status } = useSession();
   const [calcCredit, setCalcCredit] = useState(200);
 
   const active = useMemo(() => books.filter((b) => b.status === "active"), [books]);
@@ -66,8 +68,12 @@ export default function Home() {
                 <div className="text-white/55 text-xs mt-0.5">ном</div>
               </div>
               <div>
-                <div className="text-2xl font-extrabold text-accent">{credit}</div>
-                <div className="text-white/55 text-xs mt-0.5">таны кредит</div>
+                <div className="text-2xl font-extrabold text-accent">
+                  {status === "authenticated" ? credit : "+120"}
+                </div>
+                <div className="text-white/55 text-xs mt-0.5">
+                  {status === "authenticated" ? "таны кредит" : "нэвтрээд авах"}
+                </div>
               </div>
               <div>
                 <div className="text-2xl font-extrabold">5,000₮</div>

@@ -51,7 +51,7 @@ export default function BookRail({ title, subtitle, href, books, emptyText, badg
           </button>
           {href && (
             <Link href={href} className="text-xs font-bold text-blue-600 hover:underline whitespace-nowrap">
-              Бүгдийг үзэх →
+              Бүгдийг үзэх ({books.length}) →
             </Link>
           )}
         </div>

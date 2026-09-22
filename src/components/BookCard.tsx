@@ -50,17 +50,17 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
         )}
         {/* Нөхцөл badge — зүүн дээд */}
         <span
-          className={`absolute left-2 top-2 rounded-full px-2 py-1 text-[10px] font-extrabold text-white shadow ${CONDITION_BADGE[book.condition]}`}
+          className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow-sm ring-1 ring-black/10 ${CONDITION_BADGE[book.condition]}`}
         >
           {CONDITION_LABEL[book.condition]}
         </span>
         {/* Source badge — баруун дээд */}
         {book.source === "official" ? (
-          <span className="absolute right-2 top-2 rounded-full bg-navy px-2 py-1 text-[10px] font-extrabold text-white shadow">
+          <span className="absolute right-1.5 top-1.5 rounded-md bg-navy/90 backdrop-blur px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow-sm ring-1 ring-black/10">
             Garidebook
           </span>
         ) : (
-          <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[10px] font-extrabold text-slate-600 shadow">
+          <span className="absolute right-1.5 top-1.5 rounded-md bg-white/85 backdrop-blur px-1.5 py-0.5 text-[9px] font-extrabold text-slate-600 shadow-sm ring-1 ring-black/5">
             P2P
           </span>
         )}
