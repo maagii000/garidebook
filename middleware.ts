@@ -24,6 +24,7 @@ export const config = {
     "/wishlist",
     "/books/new",
     "/checkout/:path*",
+    "/read/:path*",
     "/admin/:path*",
   ],
 };

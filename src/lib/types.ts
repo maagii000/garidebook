@@ -1,4 +1,4 @@
-export type Category = "children" | "fiction" | "textbook";
+export type Category = "children" | "fiction" | "textbook" | "self_help" | "biography";
 export type Condition = "new" | "like_new" | "good" | "used";
 export type Source = "official" | "user";
 export type BookStatus = "pending" | "active" | "sold" | "rejected";
@@ -18,6 +18,12 @@ export interface Book {
   avgRating: number;
   reviewCount: number;
   createdAt: string;
+  // Ebook fields (physical P2P listing бол undefined)
+  hasPdf?: boolean;
+  hasAi?: boolean;
+  pages?: number;
+  coverUrl?: string;
+  owned?: boolean; // нэвтэрсэн хэрэглэгч худалдаж авсан эсэх
 }
 
 export interface Review {
@@ -55,6 +61,8 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   children: "Хүүхдийн",
   fiction: "Уран зохиол",
   textbook: "Сурах бичиг",
+  self_help: "Хувь хүний хөгжил",
+  biography: "Намтар",
 };
 
 export const CONDITION_LABEL: Record<Condition, string> = {

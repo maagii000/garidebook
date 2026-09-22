@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
     const order = await db.$transaction(async (tx) => {
       const book = await tx.book.findUnique({ where: { id: bookId } });
       if (!book) throw new Error("Ном олдсонгүй");
+      if (book.pdfPath) throw new Error("Ebook-г QPay checkout-оор авна");
       if (book.status === "sold") throw new Error("Аль хэдийн зарагдсан");
       if (book.status !== "active") throw new Error("Ном идэвхтэй биш байна");
 

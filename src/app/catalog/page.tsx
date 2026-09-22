@@ -1,18 +1,41 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Category } from "@/lib/types";
 import BookCard from "@/components/BookCard";
 
 type SourceTab = "all" | "official" | "user";
 
-export default function CatalogPage() {
+const TABS: [SourceTab, string][] = [
+  ["all", "Бүгд"],
+  ["official", "Garidebook Stock"],
+  ["user", "Сурагчдын (P2P)"],
+];
+
+const CATS: { v: "" | Category; label: string }[] = [
+  { v: "", label: "Бүгд" },
+  { v: "children", label: "Хүүхдийн" },
+  { v: "fiction", label: "Уран зохиол" },
+  { v: "textbook", label: "Сурах бичиг" },
+  { v: "self_help", label: "Хувь хүний хөгжил" },
+  { v: "biography", label: "Намтар" },
+];
+
+function CatalogInner() {
   const { books } = useStore();
+  const sp = useSearchParams();
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<SourceTab>("all");
   const [cat, setCat] = useState<"" | Category>("");
   const [sort, setSort] = useState<"new" | "rating" | "price">("new");
+
+  useEffect(() => {
+    const initial = sp.get("q");
+    if (initial) setQ(initial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sp]);
 
   const list = useMemo(() => {
     let out = books.filter((b) => b.status !== "rejected");
@@ -35,34 +58,36 @@ export default function CatalogPage() {
   }, [books, q, tab, cat, sort]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Каталоги</h1>
+    <div className="mx-auto max-w-7xl px-4 py-8">
+      <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">Каталоги</h1>
       <p className="text-sm text-slate-500 mt-1">
         Garidebook Stock (албан ёсны) + сурагчдын P2P зарууд — нийт {list.length} ном
       </p>
 
       <div className="mt-5 flex flex-col lg:flex-row gap-3 lg:items-center">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="🔍 Ном, зохиолчоор хайх..."
-          className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-accent"
-        />
+        <div className="flex flex-1 items-center gap-2 rounded-full bg-white border border-slate-200 px-4 py-2.5 focus-within:border-navy/40 focus-within:ring-2 focus-within:ring-navy/10">
+          <span className="text-slate-400">🔍</span>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Ном, зохиолчоор хайх..."
+            className="w-full bg-transparent text-sm outline-none"
+          />
+          {q && (
+            <button onClick={() => setQ("")} className="text-slate-400 hover:text-slate-600 text-xs font-bold">
+              ✕
+            </button>
+          )}
+        </div>
         <div className="flex gap-2 text-sm font-bold">
-          {(
-            [
-              ["all", "Бүгд"],
-              ["official", "Garidebook Stock"],
-              ["user", "Сурагчдын (P2P)"],
-            ] as [SourceTab, string][]
-          ).map(([v, label]) => (
+          {TABS.map(([v, label]) => (
             <button
               key={v}
               onClick={() => setTab(v)}
-              className={`rounded-full px-4 py-2 border ${
+              className={`rounded-full px-4 py-2 border transition ${
                 tab === v
-                  ? "bg-navy text-white border-navy"
-                  : "bg-white text-slate-600 border-slate-300"
+                  ? "bg-navy text-white border-navy shadow"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
               }`}
             >
               {label}
@@ -71,42 +96,63 @@ export default function CatalogPage() {
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2 text-sm">
-        <select
-          value={cat}
-          onChange={(e) => setCat(e.target.value as "" | Category)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2"
-        >
-          <option value="">Ангилал: Бүгд</option>
-          <option value="children">Хүүхдийн</option>
-          <option value="fiction">Уран зохиол</option>
-          <option value="textbook">Сурах бичиг</option>
-        </select>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        {CATS.map((c) => (
+          <button
+            key={c.label}
+            onClick={() => setCat(c.v)}
+            className={`rounded-full px-3.5 py-1.5 text-[13px] font-bold border transition ${
+              cat === c.v
+                ? "bg-slate-900 text-white border-slate-900"
+                : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as "new" | "rating" | "price")}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2"
+          className="ml-auto rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[13px] font-bold text-slate-600"
         >
           <option value="new">Эрэмбэ: Шинэ нь эхэнд</option>
           <option value="rating">Эрэмбэ: Үнэлгээ өндөр</option>
           <option value="price">Эрэмбэ: Үнэ хямд</option>
         </select>
-        <span className="ml-auto self-center text-xs text-slate-500">
-          Туршилтын үнэ: ~5,000₮ эсвэл Кредит + Мөнгө
-        </span>
       </div>
+      <p className="mt-2 text-xs text-slate-400">
+        💡 Бүх үнэ дээр кредит ашиглаж −2,000₮ хүртэл хямдруулж болно.
+      </p>
 
       {list.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-          Ном олдсонгүй. Шүүлтүүрээ суллана уу.
+        <div className="mt-10 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
+          <div className="text-5xl">🔍</div>
+          <div className="mt-3 font-extrabold text-slate-900">Ном олдсонгүй</div>
+          <p className="mt-1 text-sm text-slate-500">
+            Шүүлтүүрээ суллах эсвэл эхний номоо өөрөө оруулаад кредит аваарай.
+          </p>
+          <button
+            onClick={() => { setQ(""); setTab("all"); setCat(""); }}
+            className="mt-4 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-bold text-white"
+          >
+            Шүүлтүүр цэвэрлэх
+          </button>
         </div>
       ) : (
-        <div className="mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {list.map((b) => (
-            <BookCard key={b.id} book={b} />
+            <BookCard key={b.id} book={b} className="w-full" />
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+export default function CatalogPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 text-slate-500">Уншиж байна...</div>}>
+      <CatalogInner />
+    </Suspense>
   );
 }

@@ -2,25 +2,41 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { MAX_CREDIT_USE_PER_ORDER, CREDIT_TO_MNT } from "@/lib/types";
+
+interface PayState {
+  paymentId: string;
+  cash: number;
+  creditUsed: number;
+  qr_image: string;
+  shortUrl?: string;
+}
 
 export default function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { books, credit, checkout, notify } = useStore();
+  const { books, credit, checkout, notify, refreshAll } = useStore();
   const book = books.find((b) => b.id === id);
   const [use, setUse] = useState(100);
   const [busy, setBusy] = useState(false);
+  const [pay, setPay] = useState<PayState | null>(null);
+  const [paid, setPaid] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, []);
 
   if (!book) return <div className="p-10 text-center">Ном олдсонгүй</div>;
+  const isEbook = !!book.hasPdf;
 
   const maxUse = Math.min(credit, MAX_CREDIT_USE_PER_ORDER, Math.floor(book.priceCash / CREDIT_TO_MNT));
   const clamped = Math.max(0, Math.min(use, maxUse));
   const cash = book.priceCash - clamped * CREDIT_TO_MNT;
 
-  async function submit() {
+  async function submitPhysical() {
     setBusy(true);
     const res = await checkout(book!.id, clamped);
     setBusy(false);
@@ -29,10 +45,89 @@ export default function CheckoutPage() {
     router.push("/profile");
   }
 
+  async function startQpay() {
+    setBusy(true);
+    try {
+      const r = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookId: book!.id, creditToUse: clamped }),
+      });
+      const d = await r.json();
+      if (!r.ok) { notify(d.error || "Төлбөр үүсгэхэд алдаа", "err"); return; }
+      if (d.paid || d.owned) {
+        setPaid(true);
+        refreshAll();
+        return;
+      }
+      setPay(d);
+      // Poll every 5s
+      pollRef.current = setInterval(async () => {
+        try {
+          const s = await fetch(`/api/payments/${d.paymentId}`).then((x) => x.json());
+          if (s.status === "PAID") {
+            if (pollRef.current) clearInterval(pollRef.current);
+            setPaid(true);
+            refreshAll();
+            notify("Төлбөр баталгаажлаа ✓");
+          }
+        } catch { /* keep polling */ }
+      }, 5000);
+    } catch (e) {
+      notify(e instanceof Error ? e.message : "Алдаа гарлаа", "err");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (paid) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-16 text-center">
+        <div className="text-6xl">🎉</div>
+        <h1 className="mt-4 text-2xl font-extrabold text-navy">Төлбөр амжилттай!</h1>
+        <p className="mt-2 text-sm text-slate-500">«{book.title}» ном танд нээгдлээ.</p>
+        <div className="mt-6 flex flex-col gap-2">
+          <Link href={`/read/${book.id}`} className="rounded-xl bg-navy px-5 py-3.5 font-extrabold text-white">
+            📖 Номыг унших
+          </Link>
+          <Link href={`/books/${book.id}`} className="rounded-xl border px-5 py-3 font-bold">
+            🤖 AI-аас асуух
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (pay) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-8 text-center">
+        <h1 className="text-xl font-extrabold text-navy">QPay-ээр төлөх — {pay.cash.toLocaleString()}₮</h1>
+        <p className="mt-1 text-sm text-slate-500">Банкны аппаараа QR-ыг уншуулна уу. Төлсний дараа автоматаар нээгдэнэ.</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`data:image/png;base64,${pay.qr_image}`} alt="QPay QR" className="mx-auto mt-5 h-72 w-72 rounded-2xl border bg-white p-3" />
+        {pay.shortUrl && (
+          <a href={pay.shortUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-bold text-accent-dark hover:underline">
+            Утаснаасаа шууд төлөх →
+          </a>
+        )}
+        <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
+          <span className="h-3 w-3 animate-ping rounded-full bg-sage" /> Төлбөр хүлээж байна...
+        </div>
+        <button onClick={() => { if (pollRef.current) clearInterval(pollRef.current); setPay(null); }}
+          className="mt-4 text-sm text-slate-400 hover:underline">
+          Болих
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <Link href={`/books/${book.id}`} className="text-sm font-bold text-slate-500">← Ном руу буцах</Link>
       <h1 className="mt-2 text-2xl md:text-3xl font-extrabold text-navy">Төлбөр — Кредит + Мөнгө</h1>
+      {isEbook && (
+        <p className="mt-1 text-sm text-slate-500">📕 Ebook — төлсний дараа унших + AI эрх нээгдэнэ. Татаж авах боломжгүй.</p>
+      )}
 
       <div className="mt-5 rounded-3xl border bg-white p-6">
         <div className="font-extrabold text-lg">{book.title}</div>
@@ -48,28 +143,28 @@ export default function CheckoutPage() {
               <span>Ашиглах кредит (таны үлдэгдэл: {credit})</span>
               <span className="text-accent-dark">{clamped} кр = −{(clamped * CREDIT_TO_MNT).toLocaleString()}₮</span>
             </div>
-            <input
-              type="range" min={0} max={maxUse} value={clamped}
+            <input type="range" min={0} max={maxUse} value={clamped}
               onChange={(e) => setUse(Number(e.target.value))}
-              className="mt-2 w-full accent-[#FF7A00]"
-            />
+              className="mt-2 w-full accent-[#FF7A00]" />
             <div className="flex justify-between text-[11px] text-slate-400">
               <span>0</span><span>max {maxUse} (2,000₮ хүртэл)</span>
             </div>
           </div>
           <div className="mt-3 border-t pt-3 flex justify-between items-center">
-            <span className="font-bold">Бэлнээр төлөх</span>
+            <span className="font-bold">{isEbook ? "QPay-ээр төлөх" : "Бэлнээр төлөх"}</span>
             <span className="text-2xl font-extrabold text-navy">{cash.toLocaleString()}₮</span>
           </div>
         </div>
 
-        <button onClick={submit} disabled={busy}
+        <button onClick={isEbook ? startQpay : submitPhysical} disabled={busy}
           className="mt-4 w-full rounded-xl bg-sage px-5 py-3.5 font-extrabold text-white hover:brightness-95 disabled:opacity-50">
-          {busy ? "Захиалж байна..." : `✅ Захиалах — ${cash.toLocaleString()}₮ + ${clamped} кр`}
+          {busy ? "Боловсруулж байна..." : isEbook ? `📱 QPay QR үүсгэх — ${cash.toLocaleString()}₮ + ${clamped} кр` : `✅ Захиалах — ${cash.toLocaleString()}₮ + ${clamped} кр`}
         </button>
-        <p className="mt-2 text-[11px] text-slate-400 text-center">
-          Бэлэн / шилжүүлгээр төлнө (COD). QPay дараагийн шатанд холбогдоно.
-        </p>
+        {isEbook && (
+          <p className="mt-2 text-[11px] text-slate-400 text-center">
+            QPay sandbox тест орчин. Төлсний дараа e-barimt автоматаар үүснэ.
+          </p>
+        )}
       </div>
     </div>
   );

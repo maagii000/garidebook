@@ -53,6 +53,8 @@ enum Category {
   children
   fiction
   textbook
+  self_help
+  biography
 }
 
 enum Condition {
@@ -77,6 +79,13 @@ enum BookStatus {
 enum OrderStatus {
   placed
   cancelled
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
 }
 
 model User {
@@ -108,6 +117,9 @@ model Book {
   source      Source     @default(user)
   status      BookStatus @default(pending)
   priceCash   Int        @default(5000)
+  isDigital   Boolean    @default(false)
+  fileUrl     String?
+  pageCount   Int?
   ownerId     String
   owner       User       @relation("BookOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   images      BookImage[]
@@ -118,6 +130,16 @@ model Book {
   wishlisted  Wishlist[]
   creditTxs   CreditTx[]
   orders      Order[]
+  payments    Payment[]
+  // Ebook fields (null = physical P2P listing)
+  pdfPath     String?
+  coverUrl    String?
+  pages       Int?
+  textReady   Boolean    @default(false)
+  allowCredit Boolean    @default(true)
+  classificationCode String?
+  chunks      BookChunk[]
+  aiQueries   AiQuery[]
 
   @@index([status, source])
   @@index([category])
@@ -177,6 +199,57 @@ model Order {
   creditSpent Int
   status      OrderStatus @default(placed)
   createdAt   DateTime    @default(now())
+  payments    Payment[]
 
   @@index([buyerId])
+  @@index([bookId, buyerId])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  orderId       String?
+  order         Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  buyerId       String
+  bookId        String
+  book          Book          @relation(fields: [bookId], references: [id])
+  amount        Int
+  creditSpent   Int           @default(0)
+  status        PaymentStatus @default(PENDING)
+  qpayInvoiceId String?
+  qpayPaymentId String?
+  ebarimtId     String?
+  createdAt     DateTime      @default(now())
+  paidAt        DateTime?
+
+  @@index([buyerId])
+  @@index([qpayInvoiceId])
+}
+
+model BookChunk {
+  id      String @id @default(cuid())
+  bookId  String
+  book    Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  chunkNo Int
+  pageNo  Int?
+  content String
+
+  @@index([bookId])
+}
+
+model AiQuery {
+  id         String   @id @default(cuid())
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId     String
+  question   String
+  answer     String
+  chunksUsed Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([bookId, userId])
+}
+
+model Setting {
+  key   String @id
+  value String
 }

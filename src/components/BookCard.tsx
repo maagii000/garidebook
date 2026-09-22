@@ -1,64 +1,117 @@
 import Link from "next/link";
-import { Book, CATEGORY_LABEL, STATUS_LABEL } from "@/lib/types";
+import {
+  Book,
+  CATEGORY_LABEL,
+  CONDITION_LABEL,
+  CREDIT_TO_MNT,
+  MAX_CREDIT_USE_PER_ORDER,
+} from "@/lib/types";
 import RatingStars from "./RatingStars";
 
-const STATUS_STYLE: Record<string, string> = {
-  active: "bg-sage-light text-emerald-700",
-  pending: "bg-amber-100 text-amber-700",
-  sold: "bg-slate-200 text-slate-600",
-  rejected: "bg-red-100 text-red-600",
+const CONDITION_BADGE: Record<string, string> = {
+  new: "bg-orange-500",
+  like_new: "bg-blue-600",
+  good: "bg-emerald-600",
+  used: "bg-slate-500",
 };
 
-const CONDITION_COLOR: Record<string, string> = {
-  new: "from-orange-400 to-amber-500",
-  like_new: "from-blue-500 to-indigo-600",
-  good: "from-emerald-500 to-teal-600",
+const COVER_GRADIENT: Record<string, string> = {
+  new: "from-orange-400 to-amber-600",
+  like_new: "from-blue-500 to-indigo-700",
+  good: "from-emerald-500 to-teal-700",
   used: "from-slate-500 to-slate-700",
 };
 
-export default function BookCard({ book }: { book: Book }) {
-  const cover = book.images?.[0];
+export function creditQuote(priceCash: number) {
+  const maxDiscount = MAX_CREDIT_USE_PER_ORDER * CREDIT_TO_MNT; // 2000₮
+  const discount = Math.min(maxDiscount, Math.max(0, priceCash - 1000));
+  return {
+    maxDiscount,
+    discount,
+    finalCash: Math.max(0, priceCash - discount),
+    creditNeeded: Math.round(discount / CREDIT_TO_MNT),
+  };
+}
+
+export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }: { book: Book; className?: string }) {
+  const cover = book.images?.[0] || book.coverUrl;
+  const q = creditQuote(book.priceCash);
   return (
     <Link
       href={`/books/${book.id}`}
-      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition"
+      className={`group shrink-0 overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 ${className}`}
     >
-      <div className="relative h-44 overflow-hidden">
+      {/* Босоо ковер 3:4 — Mbook маяг */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={cover} alt={book.title} className="h-full w-full object-cover group-hover:scale-105 transition" />
+          <img
+            src={cover}
+            alt={book.title}
+            loading="lazy"
+            className="h-full w-full object-cover group-hover:scale-105 transition duration-300"
+          />
         ) : (
-          <div className={`h-full w-full bg-gradient-to-br ${CONDITION_COLOR[book.condition]} flex items-center justify-center p-4`}>
-            <span className="text-white font-extrabold text-lg text-center leading-snug clamp-2">
+          <div
+            className={`h-full w-full bg-gradient-to-br ${COVER_GRADIENT[book.condition]} flex items-center justify-center p-4`}
+          >
+            <span className="text-white font-extrabold text-sm text-center leading-snug clamp-2">
               {book.title}
             </span>
           </div>
         )}
-        <span className={`absolute left-2 top-2 rounded-full px-2.5 py-1 text-[11px] font-bold ${STATUS_STYLE[book.status]}`}>
-          {STATUS_LABEL[book.status]}
+        {/* Нөхцөл badge — зүүн дээд */}
+        <span
+          className={`absolute left-2 top-2 rounded-full px-2 py-1 text-[10px] font-extrabold text-white shadow ${CONDITION_BADGE[book.condition]}`}
+        >
+          {CONDITION_LABEL[book.condition]}
         </span>
-        {book.source === "official" && (
-          <span className="absolute right-2 top-2 rounded-full bg-navy px-2.5 py-1 text-[11px] font-bold text-white">
+        {/* Source badge — баруун дээд */}
+        {book.source === "official" ? (
+          <span className="absolute right-2 top-2 rounded-full bg-navy px-2 py-1 text-[10px] font-extrabold text-white shadow">
             Garidebook
+          </span>
+        ) : (
+          <span className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[10px] font-extrabold text-slate-600 shadow">
+            P2P
+          </span>
+        )}
+        {book.status === "sold" && (
+          <span className="absolute inset-0 grid place-items-center bg-slate-900/50 text-white text-xs font-extrabold">
+            Зарагдсан
           </span>
         )}
       </div>
-      <div className="p-3.5">
-        <div className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
-          {CATEGORY_LABEL[book.category]} • {book.author}
+
+      <div className="p-3">
+        <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400 truncate">
+          {CATEGORY_LABEL[book.category]}
         </div>
-        <div className="mt-1 font-bold leading-snug clamp-2 min-h-[2.6em]">{book.title}</div>
-        <div className="mt-1.5 flex items-center gap-1.5">
+        <div className="mt-0.5 text-[13px] font-bold leading-snug clamp-2 min-h-[2.5em] text-slate-900">
+          {book.title}
+        </div>
+        <div className="text-xs text-slate-500 truncate">{book.author}</div>
+
+        <div className="mt-1.5 flex items-center gap-1">
           <RatingStars value={book.avgRating} />
-          <span className="text-xs text-slate-500">
-            {book.avgRating > 0 ? book.avgRating.toFixed(1) : "—"} ({book.reviewCount})
+          <span className="text-[11px] text-slate-400">
+            {book.avgRating > 0 ? book.avgRating.toFixed(1) : "—"}
           </span>
         </div>
-        <div className="mt-2 flex items-center justify-between">
-          <span className="font-extrabold text-navy">{book.priceCash.toLocaleString()}₮</span>
-          <span className="rounded-full bg-accent-light px-2.5 py-1 text-xs font-bold text-accent-dark">
-            + кредитээр хямдруулна
-          </span>
+
+        {/* Кредит-first үнэ блок */}
+        <div className="mt-2 rounded-xl bg-slate-50 px-2.5 py-2">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-[11px] text-slate-400 line-through">
+              {book.priceCash.toLocaleString()}₮
+            </span>
+            <span className="text-sm font-extrabold text-navy">
+              {q.finalCash.toLocaleString()}₮
+            </span>
+          </div>
+          <div className="mt-0.5 text-[11px] font-bold text-accent-dark">
+            {q.creditNeeded}кр → −{q.discount.toLocaleString()}₮
+          </div>
         </div>
       </div>
     </Link>

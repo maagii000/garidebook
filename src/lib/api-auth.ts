@@ -27,7 +27,7 @@ export function forbidden(msg = "Эрх хүрэхгүй") {
 
 // Prisma book → frontend shape
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function toBook(b: any) {
+export function toBook(b: any, owned = false) {
   return {
     id: b.id,
     title: b.title,
@@ -43,5 +43,10 @@ export function toBook(b: any) {
     avgRating: b.avgRating,
     reviewCount: b.reviewCount,
     createdAt: b.createdAt,
+    hasPdf: !!b.pdfPath,
+    hasAi: !!b.pdfPath && !!b.textReady,
+    pages: b.pages ?? undefined,
+    coverUrl: b.coverUrl ?? undefined,
+    owned,
   };
 }

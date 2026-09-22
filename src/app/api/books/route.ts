@@ -43,7 +43,19 @@ export async function GET(req: NextRequest) {
         : [{ createdAt: "desc" as const }];
 
   const books = await db.book.findMany({ where, include: bookInclude, orderBy, take: 200 });
-  return NextResponse.json({ books: books.map(toBook) });
+  // owned map (optional session)
+  let ownedSet = new Set<string>();
+  try {
+    const { getServerSession } = await import("next-auth");
+    const { authOptions } = await import("@/lib/auth");
+    const session = await getServerSession(authOptions);
+    const uid = (session?.user as { id?: string } | undefined)?.id;
+    if (uid) {
+      const os = await db.order.findMany({ where: { buyerId: uid, status: "placed" }, select: { bookId: true } });
+      ownedSet = new Set(os.map((o) => o.bookId));
+    }
+  } catch { /* public fallback */ }
+  return NextResponse.json({ books: books.map((b) => toBook(b, ownedSet.has(b.id))) });
 }
 
 // POST /api/books — ном оруулах + авто-кредит

@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 import { Book, CATEGORY_LABEL, CONDITION_LABEL, STATUS_LABEL } from "@/lib/types";
 import RatingStars from "@/components/RatingStars";
 import BookCard from "@/components/BookCard";
+import AiChat from "@/components/AiChat";
 
 interface ReviewItem {
   id: string;
@@ -59,6 +60,8 @@ export default function BookDetailPage() {
   const related = books.filter((b) => b.id !== book.id && b.category === book.category).slice(0, 4);
   const wished = wishlist.includes(book.id);
   const cover = book.images?.[0];
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === "ADMIN";
+  const canAccess = !!book.owned || isAdmin;
 
   async function submitReview() {
     if (!book) return;
@@ -149,6 +152,21 @@ export default function BookDetailPage() {
               {book.status === "sold" ? "Зарагдсан" : "💳 Кредит + Мөнгөөр авах"}
             </button>
           </div>
+          {book.hasPdf && (
+            <div className="mt-3 flex gap-2">
+              {canAccess ? (
+                <Link href={`/read/${book.id}`}
+                  className="flex-1 text-center rounded-xl bg-navy px-5 py-3 font-extrabold text-white hover:bg-navy-dark">
+                  📖 Номыг унших {book.pages ? `(${book.pages} хуудас)` : ""}
+                </Link>
+              ) : (
+                <div className="flex-1 rounded-xl bg-paper border px-4 py-3 text-sm text-slate-500 text-center">
+                  📕 Ebook + 🤖 AI — худалдаж авмагц нээгдэнэ. Татаж авах боломжгүй.
+                </div>
+              )}
+            </div>
+          )}
+          {book.hasAi && canAccess && <AiChat bookId={book.id} />}
         </div>
       </div>
 

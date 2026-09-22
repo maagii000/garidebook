@@ -25,7 +25,14 @@ const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABA
 
 const { data, error } = await sb.storage.createBucket("book-images", { public: true });
 if (error && !error.message.includes("already exists")) {
-  console.error("FAIL:", error.message);
+  console.error("FAIL book-images:", error.message);
   process.exit(1);
 }
 console.log("bucket OK:", data?.name ?? "book-images (already existed)");
+
+const eb = await sb.storage.createBucket("ebooks", { public: false });
+if (eb.error && !eb.error.message.includes("already exists")) {
+  console.error("FAIL ebooks:", eb.error.message);
+  process.exit(1);
+}
+console.log("bucket OK:", eb.data?.name ?? "ebooks (already existed)");

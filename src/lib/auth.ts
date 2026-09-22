@@ -6,6 +6,7 @@ import { db } from "./db";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
+  debug: process.env.NEXTAUTH_DEBUG === "1",
   session: { strategy: "jwt" },
   pages: { signIn: "/login", verifyRequest: "/login?verify=1" },
   providers: [
