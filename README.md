@@ -71,7 +71,27 @@ npm run dev
 
 ```
 prisma/ (schema + migrations + seed.mjs)
-src/app/ (хуудсууд) + src/app/api/ (books/reviews/wishlist/credits/orders/uploads/admin/auth)
-src/lib/ (db, auth, api-auth, supabase-server, store, types)
-middleware.ts (auth gate) · scripts/setup-storage.mjs
+src/app/ (хуудсууд) + src/app/api/ (books/reviews/wishlist/credits/orders/uploads/admin/auth/payments/ai)
+src/lib/ (db, auth, api-auth, supabase-server, store, types, qpay, payments, retrieval, deepseek)
+middleware.ts (auth gate) · scripts/setup-storage.mjs · scripts/ingest-books.mjs
 ```
+
+## 📕 Ebooks + AI + QPay (v2)
+
+- **Номнууд:** `C:\Users\asus\Desktop\номууд`-ийн 6 PDF → `ebooks` private bucket +
+  `BookChunk` (хуудасны дугаартай) → `node scripts/ingest-books.mjs`
+- **Reader:** `/read/[id]` — PDF.js, download/print хаалттай, watermark, 10-минутын
+  signed URL (`GET /api/books/[id]/pdf`). Зөвхөн худалдаж авсан + admin.
+- **AI Q&A:** `POST /api/ai/ask` — keyword retrieval (top-5 chunk) + DeepSeek
+  (`deepseek-flash` reasoning → `reasoning_content` fallback). Өдөрт 30 асуулт/хэрэглэгч.
+  Env: `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL`, `DEEPSEEK_BASE_URL`.
+- **QPay sandbox:** `TEST_MERCHANT/123456`, `TEST_INVOICE`. Flow:
+  `POST /api/payments` (invoice+QR) → polling `GET /api/payments/[id]` →
+  `payment/check` → PAID → Order + кредит хасалт + ebarimt оролдлого.
+  Callback: `GET /api/payments/qpay-callback?pid=...` (QPay дуудна).
+  Env: `QPAY_HOST/USERNAME/PASSWORD/INVOICE_CODE/EB_INVOICE_CODE/TAX_TYPE/DISTRICT_CODE/EB_PATH`.
+  Production эрх ирэхэд эдгээрийг солиход хангалттай.
+- **Ebarimt:** `ebarimt_v3/create` (fallback `v2`) — QPay идэвхжүүлэлт шаарддаг;
+  бүтэлгүйтвэл admin console-оос «Ebarimt дахин» товчоор retry.
+- **Admin:** `/admin` 4 таб — Номууд (approve + үнэ), Ном нэмэх (PDF upload +
+  browser текст задлал + chunk), Төлбөрүүд, AI статистик.

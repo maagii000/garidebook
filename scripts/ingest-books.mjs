@@ -111,7 +111,7 @@ async function main() {
     }
     // 3. chunk + insert
     await prisma.bookChunk.deleteMany({ where: { bookId: b.id } });
-    const book = await prisma.book.upsert({
+    await prisma.book.upsert({
       where: { id: b.id },
       update: {
         title: b.title, author: b.author, category: b.category, condition: b.condition,

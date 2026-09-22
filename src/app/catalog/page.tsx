@@ -33,8 +33,11 @@ function CatalogInner() {
 
   useEffect(() => {
     const initial = sp.get("q");
-    if (initial) setQ(initial);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (initial) {
+      // URL query → state sync (legitimate effect use-case)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQ(initial);
+    }
   }, [sp]);
 
   const list = useMemo(() => {
