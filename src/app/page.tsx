@@ -187,15 +187,15 @@ export default function Home() {
                 Stock үзэх →
               </Link>
             </div>
-            <div className="flex gap-6 text-center">
+            <div className="grid grid-cols-3 gap-2 md:gap-6 text-center w-full md:w-auto">
               {[
                 ["60–120", "ном оруулахад"],
                 ["10₮", "1 кредит ="],
                 ["200кр", "max / захиалга"],
               ].map(([v, l]) => (
-                <div key={l} className="rounded-2xl bg-white/10 px-5 py-4 min-w-[110px]">
-                  <div className="text-xl font-extrabold">{v}</div>
-                  <div className="mt-0.5 text-[11px] text-white/65">{l}</div>
+                <div key={l} className="rounded-2xl bg-white/10 px-2 py-3 md:px-5 md:py-4 md:min-w-[110px]">
+                  <div className="text-base md:text-xl font-extrabold whitespace-nowrap">{v}</div>
+                  <div className="mt-0.5 text-[10px] md:text-[11px] text-white/65 leading-tight">{l}</div>
                 </div>
               ))}
             </div>

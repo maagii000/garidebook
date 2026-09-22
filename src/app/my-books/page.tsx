@@ -25,10 +25,10 @@ export default function MyBooksPage() {
         </Link>
       </div>
 
-      <div className="mt-4 flex gap-2 text-sm font-bold">
+      <div className="mt-4 flex gap-2 text-sm font-bold overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0">
         {([["", "Бүгд"], ["pending", "Шалгагдаж байгаа"], ["active", "Идэвхтэй"], ["sold", "Зарагдсан"]] as ["" | BookStatus, string][]).map(([v, l]) => (
           <button key={l} onClick={() => setFilter(v)}
-            className={`rounded-full px-4 py-2 border ${filter === v ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
+            className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 border ${filter === v ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
             {l}
           </button>
         ))}

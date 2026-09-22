@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -22,6 +22,19 @@ export default function ReadPage() {
   const [zoom, setZoom] = useState(1);
   const [err, setErr] = useState("");
   const [goto, setGoto] = useState("");
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [wrapW, setWrapW] = useState(0);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((es) => {
+      const w = es[0]?.contentRect.width ?? 0;
+      if (w > 0) setWrapW(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     fetch(`/api/books/${id}/pdf`)
@@ -72,9 +85,13 @@ export default function ReadPage() {
         </div>
       </div>
 
-      <div className="relative mt-4 flex justify-center" onCopy={(e) => e.preventDefault()}>
+      <div ref={wrapRef} className="relative mt-4 flex justify-center overflow-hidden" onCopy={(e) => e.preventDefault()}>
         <Document file={url} onLoadSuccess={onDoc} loading={<div className="py-20 text-slate-400">Хуудас ачааллаж байна...</div>}>
-          <Page pageNumber={page} scale={zoom} renderAnnotationLayer renderTextLayer={false} />
+          <Page
+            pageNumber={page}
+            width={wrapW > 0 ? Math.floor(Math.min(wrapW, 700) * zoom) : undefined}
+            renderAnnotationLayer renderTextLayer={false}
+          />
         </Document>
         {/* Watermark */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
