@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { BookStatus } from "@/lib/types";
 import BookCard from "@/components/BookCard";
+import { GridSkeleton } from "@/components/Skeletons";
 
 export default function MyBooksPage() {
   const { myBooks, loading } = useStore();
@@ -34,14 +35,14 @@ export default function MyBooksPage() {
       </div>
 
       {loading ? (
-        <div className="mt-8 text-center text-slate-500">Ачааллаж байна...</div>
+        <GridSkeleton count={8} />
       ) : list.length === 0 ? (
         <div className="mt-8 rounded-3xl border border-dashed p-10 text-center bg-white text-slate-500">
           Оруулсан ном алга. <Link href="/books/new" className="text-accent-dark font-bold">Энд дарж</Link> анхны номоо оруулаад кредит аваарай.
         </div>
       ) : (
         <div className="mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {list.map((b) => <BookCard key={b.id} book={b} />)}
+          {list.map((b) => <BookCard key={b.id} book={b} className="w-full" />)}
         </div>
       )}
     </div>

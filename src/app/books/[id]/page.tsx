@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 import { Book, CATEGORY_LABEL, CONDITION_LABEL, STATUS_LABEL } from "@/lib/types";
 import RatingStars from "@/components/RatingStars";
 import BookCard from "@/components/BookCard";
+import CoverArt from "@/components/CoverArt";
 import AiChat from "@/components/AiChat";
 
 interface ReviewItem {
@@ -89,12 +90,8 @@ export default function BookDetailPage() {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt={book.title} className="h-96 w-full object-cover" />
           ) : (
-            <div className="h-96 grid place-items-center bg-gradient-to-br from-navy to-indigo-600 p-8 text-center">
-              <div>
-                <div className="text-6xl">📚</div>
-                <div className="mt-3 text-2xl font-extrabold text-white">{book.title}</div>
-                <div className="text-white/70">{book.author}</div>
-              </div>
+            <div className="h-96">
+              <CoverArt book={book} />
             </div>
           )}
           {book.images.length > 1 && (
@@ -219,7 +216,7 @@ export default function BookDetailPage() {
           <h2 className="text-xl font-extrabold text-navy">Төстэй номууд</h2>
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
             {related.map((b) => (
-              <BookCard key={b.id} book={b} />
+              <BookCard key={b.id} book={b} className="w-full" />
             ))}
           </div>
         </div>

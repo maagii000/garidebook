@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { Category } from "@/lib/types";
 import BookCard from "@/components/BookCard";
+import { GridSkeleton } from "@/components/Skeletons";
 
 type SourceTab = "all" | "official" | "user";
 
@@ -154,7 +155,13 @@ function CatalogInner() {
 
 export default function CatalogPage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 text-slate-500">Уншиж байна...</div>}>
+    <Suspense fallback={
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="h-8 w-40 animate-pulse rounded bg-slate-200" />
+        <div className="mt-2 h-4 w-72 animate-pulse rounded bg-slate-100" />
+        <GridSkeleton />
+      </div>
+    }>
       <CatalogInner />
     </Suspense>
   );
