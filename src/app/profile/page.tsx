@@ -13,9 +13,8 @@ export default function ProfilePage() {
   }
   if (!session?.user) {
     return (
-      <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <div className="text-5xl">🔑</div>
-        <h1 className="mt-3 text-xl font-extrabold">Эхлээд нэвтэрнэ үү</h1>
+        <div className="mx-auto max-w-md px-4 py-16 text-center">
+        <h1 className="text-xl font-extrabold">Эхлээд нэвтэрнэ үү</h1>
         <Link href="/login" className="mt-5 inline-block rounded-xl bg-navy px-6 py-3 font-bold text-white">
           Нэвтрэх
         </Link>
@@ -41,7 +40,7 @@ export default function ProfilePage() {
           <div className="text-white/60 text-sm">{session.user.email}</div>
           {(session.user as { role?: string }).role === "ADMIN" && (
             <Link href="/admin" className="mt-2 inline-block rounded-full bg-accent px-3 py-1 text-xs font-bold">
-              🛠 Админ
+              Админ
             </Link>
           )}
         </div>
@@ -54,7 +53,7 @@ export default function ProfilePage() {
 
       <div className="mt-6 grid md:grid-cols-2 gap-5">
         <div className="rounded-3xl border bg-white p-5">
-          <h2 className="font-extrabold text-navy">💳 Кредит түүх</h2>
+          <h2 className="font-extrabold text-navy">Кредит түүх</h2>
           <div className="mt-3 space-y-2 max-h-80 overflow-auto">
             {txs.length === 0 && <div className="text-sm text-slate-500">Түүх хоосон байна.</div>}
             {txs.map((t) => (
@@ -71,12 +70,12 @@ export default function ProfilePage() {
             ))}
           </div>
           <Link href="/books/new" className="mt-4 block text-center rounded-xl bg-accent px-4 py-3 font-bold text-white hover:bg-accent-dark">
-            ➕ Ном оруулж кредит нэмэх
+            Ном оруулж кредит нэмэх
           </Link>
         </div>
 
         <div className="rounded-3xl border bg-white p-5">
-          <h2 className="font-extrabold text-navy">🧾 Миний захиалгууд ({orders.length})</h2>
+          <h2 className="font-extrabold text-navy">Миний захиалгууд ({orders.length})</h2>
           <div className="mt-3 space-y-2 max-h-80 overflow-auto">
             {orders.length === 0 && <div className="text-sm text-slate-500">Захиалга байхгүй. Каталогиос сонгоорой.</div>}
             {orders.map((o) => (

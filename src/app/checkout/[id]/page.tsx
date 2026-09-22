@@ -109,15 +109,15 @@ export default function CheckoutPage() {
   if (paid) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <div className="text-6xl">🎉</div>
+        <div className="text-6xl font-extrabold text-sage">✓</div>
         <h1 className="mt-4 text-2xl font-extrabold text-navy">Төлбөр амжилттай!</h1>
         <p className="mt-2 text-sm text-slate-500">«{book.title}» ном танд нээгдлээ.</p>
         <div className="mt-6 flex flex-col gap-2">
           <Link href={`/read/${book.id}`} className="rounded-xl bg-navy px-5 py-3.5 font-extrabold text-white">
-            📖 Номыг унших
+            Номыг унших
           </Link>
           <Link href={`/books/${book.id}`} className="rounded-xl border px-5 py-3 font-bold">
-            🤖 AI-аас асуух
+            AI-аас асуух
           </Link>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function CheckoutPage() {
             </div>
           ))}
           <p className="text-xs text-slate-500 leading-5">
-            ⏳ Шилжүүлсний дараа админ баталгаажуулмагц ном нээгдэнэ (polling ажиллаж байна).
+            Шилжүүлсний дараа админ баталгаажуулмагц ном нээгдэнэ (polling ажиллаж байна).
             Гүйлгээний утгаа заавал бичнэ үү!
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
       <Link href={`/books/${book.id}`} className="text-sm font-bold text-slate-500">← Ном руу буцах</Link>
       <h1 className="mt-2 text-2xl md:text-3xl font-extrabold text-navy">Төлбөр — Кредит + Мөнгө</h1>
       {isEbook && (
-        <p className="mt-1 text-sm text-slate-500">📕 Ebook — төлсний дараа унших + AI эрх нээгдэнэ. Татаж авах боломжгүй.</p>
+        <p className="mt-1 text-sm text-slate-500">Ebook — төлсний дараа унших + AI эрх нээгдэнэ. Татаж авах боломжгүй.</p>
       )}
 
       <div className="mt-5 rounded-3xl border bg-white p-6">
@@ -225,11 +225,11 @@ export default function CheckoutPage() {
         <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-bold">
           <button onClick={() => setMethod("qpay")}
             className={`rounded-xl border px-4 py-3 ${method === "qpay" ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
-            📱 QPay QR
+            QPay QR
           </button>
           <button onClick={() => setMethod("transfer")}
             className={`rounded-xl border px-4 py-3 ${method === "transfer" ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
-            🏦 Шилжүүлэг
+            Шилжүүлэг
           </button>
         </div>
 
@@ -237,9 +237,9 @@ export default function CheckoutPage() {
           className="mt-4 w-full rounded-xl bg-sage px-5 py-3.5 font-extrabold text-white hover:brightness-95 disabled:opacity-50">
           {busy ? "Боловсруулж байна..." : isEbook
             ? method === "qpay"
-              ? `📱 QPay QR үүсгэх — ${cash.toLocaleString()}₮ + ${clamped} кр`
-              : `🏦 Шилжүүлэг эхлүүлэх — ${cash.toLocaleString()}₮ + ${clamped} кр`
-            : `✅ Захиалах — ${cash.toLocaleString()}₮ + ${clamped} кр`}
+              ? `QPay QR үүсгэх — ${cash.toLocaleString()}₮ + ${clamped} кр`
+              : `Шилжүүлэг эхлүүлэх — ${cash.toLocaleString()}₮ + ${clamped} кр`
+            : `Захиалах — ${cash.toLocaleString()}₮ + ${clamped} кр`}
         </button>
         {isEbook && (
           <p className="mt-2 text-[11px] text-slate-400 text-center">

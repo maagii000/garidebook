@@ -16,7 +16,7 @@ export default function Footer() {
             href="/books/new"
             className="mt-4 inline-flex rounded-full bg-navy px-4 py-2 text-xs font-extrabold text-white hover:bg-navy-dark"
           >
-            📸 Ном оруулж +кредит авах
+            Ном оруулж +кредит авах
           </Link>
         </div>
         <div className="text-sm">
@@ -31,9 +31,9 @@ export default function Footer() {
         <div className="text-sm">
           <div className="font-extrabold text-blue-600 mb-3">Кредит дүрэм (MVP)</div>
           <ul className="space-y-2 text-slate-600">
-            <li>📸 Ном оруулах: +60 ~ +120 кредит</li>
-            <li>💱 1 кредит = 10₮ хөнгөлөлт</li>
-            <li>📚 Суурь үнэ: 5,000₮</li>
+            <li>Ном оруулах: +60 ~ +120 кредит</li>
+            <li>1 кредит = 10₮ хөнгөлөлт</li>
+            <li>Суурь үнэ: 5,000₮</li>
           </ul>
         </div>
       </div>

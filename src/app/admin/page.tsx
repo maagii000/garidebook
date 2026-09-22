@@ -177,10 +177,10 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold text-navy">🛠 Админ консол</h1>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Админ консол</h1>
 
       <div className="mt-4 flex gap-2 text-sm font-bold flex-wrap">
-        {([["books", "📚 Номууд"], ["add", "➕ Ном нэмэх"], ["payments", "💳 Төлбөрүүд"], ["ai", "🤖 AI"]] as [Tab, string][]).map(([v, l]) => (
+        {([["books", "Номууд"], ["add", "Ном нэмэх"], ["payments", "Төлбөрүүд"], ["ai", "AI"]] as [Tab, string][]).map(([v, l]) => (
           <button key={v} onClick={() => setTab(v)}
             className={`rounded-full px-4 py-2 border ${tab === v ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
             {l}
@@ -199,7 +199,7 @@ export default function AdminPage() {
             ))}
           </div>
 
-          <h2 className="mt-8 text-xl font-extrabold text-navy">⏳ Шалгагдаж байгаа ({pending.length})</h2>
+          <h2 className="mt-8 text-xl font-extrabold text-navy">Шалгагдаж байгаа ({pending.length})</h2>
           {pending.length === 0 && (
             <div className="mt-3 rounded-2xl bg-sage-light border border-emerald-200 p-5 text-sm text-emerald-800">
               ✓ Бүх постыг шалгасан байна.
@@ -220,7 +220,7 @@ export default function AdminPage() {
             ))}
           </div>
 
-          <h2 className="mt-8 text-xl font-extrabold text-navy">📚 Бүх ном (үнэ тохируулах)</h2>
+          <h2 className="mt-8 text-xl font-extrabold text-navy">Бүх ном (үнэ тохируулах)</h2>
           <div className="mt-3 overflow-x-auto rounded-2xl border bg-white">
             <table className="w-full text-sm min-w-[720px]">
               <thead>
@@ -235,7 +235,7 @@ export default function AdminPage() {
                 {books.map((b) => (
                   <tr key={b.id} className="border-b last:border-0">
                     <td className="p-3 font-bold">{b.title}
-                      <div className="text-xs font-normal text-slate-400">{b.author} {b.hasAi ? "🤖" : ""} {b.hasPdf ? "📕" : ""}</div>
+                      <div className="text-xs font-normal text-slate-400">{b.author} {b.hasAi ? "AI" : ""} {b.hasPdf ? "PDF" : ""}</div>
                     </td>
                     <td className="p-3">
                       <div className="flex gap-1">
@@ -262,12 +262,12 @@ export default function AdminPage() {
 
       {tab === "add" && (
         <div className="mt-5 max-w-3xl rounded-3xl border bg-white p-5 md:p-7 space-y-4">
-          <h2 className="text-xl font-extrabold text-navy">➕ Ebook нэмэх (PDF + AI)</h2>
+          <h2 className="text-xl font-extrabold text-navy">Ebook нэмэх (PDF + AI)</h2>
           <label className="block rounded-2xl border-2 border-dashed border-slate-300 bg-paper p-6 text-center cursor-pointer hover:border-accent"
             onClick={() => document.getElementById("admin-pdf")?.click()}>
             <input id="admin-pdf" type="file" accept="application/pdf" className="hidden"
               onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)} />
-            <div className="font-bold">{pdfFile ? `📕 ${pdfFile.name} (${(pdfFile.size / 1048576).toFixed(1)}MB)` : "📕 PDF сонгох"}</div>
+            <div className="font-bold">{pdfFile ? `${pdfFile.name} (${(pdfFile.size / 1048576).toFixed(1)}MB)` : "PDF сонгох"}</div>
             <div className="text-xs text-slate-500">Текст нь browser дээр задалж chunk хийнэ</div>
           </label>
           <div className="grid md:grid-cols-2 gap-4">
@@ -348,7 +348,7 @@ export default function AdminPage() {
                 <tr key={p.id} className="border-b last:border-0">
                   <td className="p-3 font-bold">{p.bookTitle}
                     <div className="text-xs font-normal text-slate-400">
-                      {p.buyer} • {p.method === "TRANSFER" ? "🏦 Шилжүүлэг" : "📱 QPay"}
+                      {p.buyer} • {p.method === "TRANSFER" ? "Шилжүүлэг" : "QPay"}
                     </div>
                   </td>
                   <td className="p-3">{p.amount.toLocaleString()}₮ + {p.creditSpent}кр</td>
@@ -368,7 +368,7 @@ export default function AdminPage() {
                       )}
                       {p.status === "PAID" && !p.ebarimtId && p.qpayPaymentId && (
                         <button onClick={() => ebarimtRetry(p.id)} className="rounded bg-accent-light px-2.5 py-1 text-xs font-bold text-accent-dark">
-                          🧾 Ebarimt дахин
+                          Ebarimt дахин
                         </button>
                       )}
                     </div>
@@ -382,7 +382,7 @@ export default function AdminPage() {
 
       {tab === "ai" && (
         <div className="mt-5 rounded-3xl border bg-white p-5">
-          <h2 className="font-extrabold text-navy">🤖 AI хэрэглээ (нийт {aiStats.total})</h2>
+          <h2 className="font-extrabold text-navy">AI хэрэглээ (нийт {aiStats.total})</h2>
           <div className="mt-3 space-y-2">
             {aiStats.byBook.length === 0 && <div className="text-sm text-slate-500">Асуулт байхгүй байна.</div>}
             {aiStats.byBook.map((b) => (

@@ -34,8 +34,8 @@ export default function CoverArt({ book, className = "" }: { book: Book; classNa
           </div>
           <div className="mt-1 text-xs font-medium text-white/75 truncate">{book.author}</div>
         </div>
-        <div className="text-[10px] font-extrabold text-white/60">
-          G<span className="text-white">aridebook</span>
+        <div className="text-[9px] font-bold tracking-widest text-white/40">
+          GARIDEBOOK
         </div>
       </div>
     </div>

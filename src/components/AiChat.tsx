@@ -41,7 +41,7 @@ export default function AiChat({ bookId }: { bookId: string }) {
 
   return (
     <div id="ai" className="mt-6 rounded-3xl border-2 border-accent/40 bg-white p-5 scroll-mt-24">
-      <h2 className="text-xl font-extrabold text-navy">🤖 Номын AI-аас асуух</h2>
+      <h2 className="text-xl font-extrabold text-navy">Номын AI-аас асуух</h2>
       <p className="text-xs text-slate-500 mt-1">
         AI номыг уншиж, асуусан мэдээллийг чинь олж өгнө.
         {remaining !== null && ` (өдөрт ${remaining} үлдсэн)`}

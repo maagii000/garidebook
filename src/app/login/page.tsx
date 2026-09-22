@@ -10,7 +10,7 @@ function LoginInner() {
   return (
     <div className="mx-auto max-w-md px-4 py-12">
       <div className="rounded-3xl border bg-white p-7 text-center">
-        <h1 className="text-2xl font-extrabold text-navy">Тавтай морил 👋</h1>
+        <h1 className="text-2xl font-extrabold text-navy">Тавтай морил</h1>
         {authError && (
           <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
             Нэвтрэхэд алдаа гарлаа ({authError}). Дахин оролдоно уу.

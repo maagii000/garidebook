@@ -14,28 +14,35 @@ export default function NewBookPage() {
   const [category, setCategory] = useState<Category>("fiction");
   const [condition, setCondition] = useState<Condition>("good");
   const [description, setDescription] = useState("");
-  const [previews, setPreviews] = useState<string[]>([]);
-  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<(string | null)[]>([null, null, null]);
+  const [files, setFiles] = useState<(File | null)[]>([null, null, null]);
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState("");
 
   const earn = CREDIT_FOR_CONDITION[condition];
+  const SLOTS = ["Ковер", "Ар тал", "Дотор тал"];
 
-  function onFiles(list: FileList | null) {
-    if (!list) return;
-    const arr = Array.from(list).filter((f) => f.type.startsWith("image/")).slice(0, 3 - files.length);
-    if (arr.length === 0) return;
-    setFiles((p) => [...p, ...arr].slice(0, 3));
-    arr.forEach((f) => {
-      const r = new FileReader();
-      r.onload = () => { if (typeof r.result === "string") setPreviews((p) => [...p, r.result as string].slice(0, 3)); };
-      r.readAsDataURL(f);
-    });
+  function onSlotFile(i: number, list: FileList | null) {
+    const f = list?.[0];
+    if (!f || !f.type.startsWith("image/")) return;
+    setFiles((p) => { const n = [...p]; n[i] = f; return n; });
+    const r = new FileReader();
+    r.onload = () => {
+      if (typeof r.result === "string")
+        setPreviews((p) => { const n = [...p]; n[i] = r.result as string; return n; });
+    };
+    r.readAsDataURL(f);
+  }
+
+  function clearSlot(i: number) {
+    setFiles((p) => { const n = [...p]; n[i] = null; return n; });
+    setPreviews((p) => { const n = [...p]; n[i] = null; return n; });
   }
 
   async function uploadAll(): Promise<string[]> {
     const urls: string[] = [];
     for (const f of files) {
+      if (!f) continue;
       const form = new FormData();
       form.append("file", f);
       const r = await fetch("/api/uploads", { method: "POST", body: form });
@@ -48,9 +55,10 @@ export default function NewBookPage() {
 
   async function submit() {
     if (!title.trim() || !author.trim()) { notify("Нэр + зохиолчоо бөглөнө үү", "err"); return; }
+    if (!files[0]) { notify("Ковер зураг заавал оруулна", "err"); return; }
     setBusy(true);
     try {
-      setStep(files.length > 0 ? "Зураг upload хийж байна..." : "Нийтэлж байна...");
+      setStep("Зураг upload хийж байна...");
       const urls = await uploadAll();
       setStep("Нийтэлж байна...");
       const res = await addBook({
@@ -70,33 +78,49 @@ export default function NewBookPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold text-navy">📸 Ном оруулах + кредит авах</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Ном оруулах + кредит авах</h1>
       <p className="mt-1 text-sm text-slate-500">
         Ковер, арын тал, дотор тал (max 3) оруулаад <b className="text-accent-dark">+{earn} кредит</b> авна.
       </p>
 
       <div className="mt-6 rounded-3xl border bg-white p-5 md:p-7 space-y-4">
-        <div
-          className="rounded-2xl border-2 border-dashed border-slate-300 bg-paper p-6 text-center cursor-pointer hover:border-accent"
-          onClick={() => document.getElementById("file-input")?.click()}
-        >
-          <input id="file-input" type="file" accept="image/*" multiple className="hidden"
-            onChange={(e) => onFiles(e.target.files)} />
-          {previews.length === 0 ? (
-            <div>
-              <div className="text-4xl">📷</div>
-              <div className="mt-2 font-bold">Зураг сонгох (утас / компьютер)</div>
-              <div className="text-xs text-slate-500">Ковер • Арын тал • Дотор тал (max 5MB/зураг)</div>
-            </div>
-          ) : (
-            <div className="flex gap-2 justify-center flex-wrap">
-              {previews.map((src, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={src} alt="" className="h-24 w-24 rounded-xl object-cover border" />
-              ))}
-              {previews.length < 3 && <span className="text-sm text-slate-400 self-center">+ нэмэх</span>}
-            </div>
-          )}
+        <div>
+          <div className="text-sm font-bold">Зураг <span className="text-slate-400 font-normal">(эхнийх нь каталогт ковер болж харагдана)</span></div>
+          <div className="mt-2 grid grid-cols-3 gap-3">
+            {SLOTS.map((label, i) => (
+              <div key={label}>
+                <div className="mb-1.5 text-xs font-bold text-slate-600">
+                  {i + 1}. {label} {i === 0 && <span className="text-red-500">*</span>}
+                </div>
+                <div
+                  onClick={() => document.getElementById(`file-input-${i}`)?.click()}
+                  className={`relative grid aspect-[3/4] cursor-pointer place-items-center overflow-hidden rounded-xl border-2 border-dashed transition ${
+                    previews[i] ? "border-transparent" : "border-slate-300 bg-paper hover:border-accent"
+                  }`}
+                >
+                  <input id={`file-input-${i}`} type="file" accept="image/*" className="hidden"
+                    onChange={(e) => onSlotFile(i, e.target.files)} />
+                  {previews[i] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previews[i]!} alt={label} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="text-center px-2">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="mx-auto text-slate-400">
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      <div className="mt-1 text-[11px] font-bold text-slate-500">Нэмэх</div>
+                      <div className="text-[10px] text-slate-400">max 5MB</div>
+                    </div>
+                  )}
+                </div>
+                {previews[i] && (
+                  <button onClick={() => clearSlot(i)} className="mt-1 w-full text-[11px] font-bold text-slate-400 hover:text-red-500">
+                    Устгах
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
@@ -120,6 +144,8 @@ export default function NewBookPage() {
               <option value="children">Хүүхдийн</option>
               <option value="fiction">Уран зохиол</option>
               <option value="textbook">Сурах бичиг</option>
+              <option value="self_help">Хувь хүний хөгжил</option>
+              <option value="biography">Намтар</option>
             </select>
           </label>
           <label className="block">
@@ -143,7 +169,7 @@ export default function NewBookPage() {
 
         <button onClick={submit} disabled={busy}
           className="w-full rounded-xl bg-accent px-5 py-3.5 font-extrabold text-white hover:bg-accent-dark disabled:opacity-50">
-          {busy ? step || "Нийтэлж байна..." : `🚀 Нийтлэх + ${earn} кредит авах`}
+          {busy ? step || "Нийтэлж байна..." : `Нийтлэх + ${earn} кредит авах`}
         </button>
         <p className="text-xs text-slate-400 text-center">Нийтлэгдмэгц кредит орно, төлөв нь «Шалгагдаж байгаа» → админ зөвшөөрнө.</p>
       </div>

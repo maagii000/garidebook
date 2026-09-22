@@ -21,7 +21,7 @@ export default function MyBooksPage() {
           <p className="text-sm text-slate-500">Төлөв: Зарагдсан / Идэвхтэй / Шалгагдаж байгаа</p>
         </div>
         <Link href="/books/new" className="ml-auto rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-accent-dark">
-          ➕ Шинэ ном нэмэх
+          Шинэ ном нэмэх
         </Link>
       </div>
 

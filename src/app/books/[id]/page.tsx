@@ -10,6 +10,7 @@ import RatingStars from "@/components/RatingStars";
 import BookCard from "@/components/BookCard";
 import CoverArt from "@/components/CoverArt";
 import AiChat from "@/components/AiChat";
+import { pushRecent } from "@/lib/recent";
 
 interface ReviewItem {
   id: string;
@@ -33,6 +34,7 @@ export default function BookDetailPage() {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
+    pushRecent(String(id));
     fetch(`/api/books/${id}`)
       .then((r) => r.json())
       .then((d) => {
@@ -48,9 +50,8 @@ export default function BookDetailPage() {
 
   if (!book) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <div className="text-5xl">📕</div>
-        <h1 className="mt-3 text-xl font-extrabold">Ном олдсонгүй</h1>
+        <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+        <h1 className="text-xl font-extrabold">Ном олдсонгүй</h1>
         <Link href="/catalog" className="mt-4 inline-block text-accent-dark font-bold hover:underline">
           ← Каталоги руу буцах
         </Link>
@@ -146,7 +147,7 @@ export default function BookDetailPage() {
               onClick={() => router.push(session ? `/checkout/${book.id}` : "/login")}
               className="flex-1 rounded-xl bg-accent px-5 py-3.5 font-extrabold text-white hover:bg-accent-dark disabled:opacity-40"
             >
-              {book.status === "sold" ? "Зарагдсан" : "💳 Кредит + Мөнгөөр авах"}
+              {book.status === "sold" ? "Зарагдсан" : "Кредит + Мөнгөөр авах"}
             </button>
           </div>
           {book.hasPdf && (
@@ -154,11 +155,11 @@ export default function BookDetailPage() {
               {canAccess ? (
                 <Link href={`/read/${book.id}`}
                   className="flex-1 text-center rounded-xl bg-navy px-5 py-3 font-extrabold text-white hover:bg-navy-dark">
-                  📖 Номыг унших {book.pages ? `(${book.pages} хуудас)` : ""}
+                  Номыг унших {book.pages ? `(${book.pages} хуудас)` : ""}
                 </Link>
               ) : (
                 <div className="flex-1 rounded-xl bg-paper border px-4 py-3 text-sm text-slate-500 text-center">
-                  📕 Ebook + 🤖 AI — худалдаж авмагц нээгдэнэ. Татаж авах боломжгүй.
+                  Ebook + AI — худалдаж авмагц нээгдэнэ. Татаж авах боломжгүй.
                 </div>
               )}
             </div>
@@ -221,6 +222,30 @@ export default function BookDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Mobile sticky buy bar */}
+      <div className="h-20 md:hidden" />
+      <div className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3">
+        <div className="flex items-center gap-3">
+          {cover ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={cover} alt="" className="h-11 w-9 rounded object-cover border border-slate-200" />
+          ) : (
+            <div className="h-11 w-9 rounded bg-navy-light grid place-items-center text-navy text-xs font-extrabold">G</div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[13px] font-bold text-slate-900">{book.title}</div>
+            <div className="text-sm font-extrabold text-navy">{book.priceCash.toLocaleString()}₮ <span className="text-[11px] font-bold text-accent-dark">−2,000₮ кр</span></div>
+          </div>
+          <button
+            disabled={book.status === "sold"}
+            onClick={() => router.push(session ? `/checkout/${book.id}` : "/login")}
+            className="shrink-0 rounded-xl bg-accent px-5 py-3 text-sm font-extrabold text-white disabled:opacity-40"
+          >
+            {book.status === "sold" ? "Зарагдсан" : "Авах"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

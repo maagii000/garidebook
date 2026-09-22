@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
   if (!title?.trim() || !author?.trim()) {
     return NextResponse.json({ error: "Нэр + зохиолч шаардлагатай" }, { status: 400 });
   }
-  if (!["children", "fiction", "textbook"].includes(category)) {
+  if (!["children", "fiction", "textbook", "self_help", "biography"].includes(category)) {
     return NextResponse.json({ error: "Ангилал буруу" }, { status: 400 });
   }
   if (!["new", "like_new", "good", "used"].includes(condition)) {

@@ -10,7 +10,7 @@ export default function WishlistPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold text-navy">🤍 Хүслийн жагсаалт ({wishlistBooks.length})</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Хүслийн жагсаалт ({wishlistBooks.length})</h1>
       {loading ? (
         <GridSkeleton count={8} />
       ) : wishlistBooks.length === 0 ? (

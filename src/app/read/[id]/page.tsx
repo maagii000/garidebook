@@ -62,7 +62,7 @@ export default function ReadPage() {
     );
   }
   if (!url) {
-    return <div className="mx-auto max-w-md px-4 py-16 text-center text-slate-500">📖 Ном нээгдэж байна...</div>;
+    return <div className="mx-auto max-w-md px-4 py-16 text-center text-slate-500">Ном нээгдэж байна...</div>;
   }
 
   return (
@@ -81,7 +81,7 @@ export default function ReadPage() {
           <button onClick={() => setZoom((z) => Math.max(0.6, +(z - 0.2).toFixed(1)))} className="rounded-lg border px-2.5 py-1.5 text-sm font-bold">−</button>
           <span className="text-xs font-bold w-10 text-center">{Math.round(zoom * 100)}%</span>
           <button onClick={() => setZoom((z) => Math.min(2.5, +(z + 0.2).toFixed(1)))} className="rounded-lg border px-2.5 py-1.5 text-sm font-bold">+</button>
-          <Link href={`/books/${id}#ai`} className="rounded-lg bg-accent px-3 py-1.5 text-sm font-bold text-white">🤖 AI</Link>
+          <Link href={`/books/${id}#ai`} className="rounded-lg bg-accent px-3 py-1.5 text-sm font-bold text-white">AI</Link>
         </div>
       </div>
 

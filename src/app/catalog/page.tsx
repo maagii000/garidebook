@@ -70,7 +70,7 @@ function CatalogInner() {
 
       <div className="mt-5 flex flex-col lg:flex-row gap-3 lg:items-center">
         <div className="flex flex-1 items-center gap-2 rounded-full bg-white border border-slate-200 px-4 py-2.5 focus-within:border-navy/40 focus-within:ring-2 focus-within:ring-navy/10">
-          <span className="text-slate-400">🔍</span>
+          <span className="text-slate-400"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="shrink-0"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg></span>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -125,12 +125,11 @@ function CatalogInner() {
         </select>
       </div>
       <p className="mt-2 text-xs text-slate-400">
-        💡 Бүх үнэ дээр кредит ашиглаж −2,000₮ хүртэл хямдруулж болно.
+        Бүх үнэ дээр кредит ашиглаж −2,000₮ хүртэл хямдруулж болно.
       </p>
 
       {list.length === 0 ? (
         <div className="mt-10 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
-          <div className="text-5xl">🔍</div>
           <div className="mt-3 font-extrabold text-slate-900">Ном олдсонгүй</div>
           <p className="mt-1 text-sm text-slate-500">
             Шүүлтүүрээ суллах эсвэл эхний номоо өөрөө оруулаад кредит аваарай.

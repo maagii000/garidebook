@@ -35,8 +35,8 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
       href={`/books/${book.id}`}
       className={`group shrink-0 overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 ${className}`}
     >
-      {/* Босоо ковер 3:4 — Mbook маяг */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
+      {/* Босоо ковер 3:4 — хурц (тавиур мэдрэмж) */}
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-slate-100 m-2 mb-0">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -48,22 +48,12 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
         ) : (
           <CoverArt book={book} />
         )}
-        {/* Нөхцөл badge — зүүн дээд */}
+        {/* Нөхцөл — цорын ганц badge */}
         <span
-          className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow-sm ring-1 ring-black/10 ${CONDITION_BADGE[book.condition]}`}
+          className={`absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white/95 shadow-sm ${CONDITION_BADGE[book.condition]}`}
         >
           {CONDITION_LABEL[book.condition]}
         </span>
-        {/* Source badge — баруун дээд */}
-        {book.source === "official" ? (
-          <span className="absolute right-1.5 top-1.5 rounded-md bg-navy/90 backdrop-blur px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow-sm ring-1 ring-black/10">
-            Garidebook
-          </span>
-        ) : (
-          <span className="absolute right-1.5 top-1.5 rounded-md bg-white/85 backdrop-blur px-1.5 py-0.5 text-[9px] font-extrabold text-slate-600 shadow-sm ring-1 ring-black/5">
-            P2P
-          </span>
-        )}
         {book.status === "sold" && (
           <span className="absolute inset-0 grid place-items-center bg-slate-900/50 text-white text-xs font-extrabold">
             Зарагдсан
@@ -73,7 +63,7 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
 
       <div className="p-3">
         <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400 truncate">
-          {CATEGORY_LABEL[book.category]}
+          {CATEGORY_LABEL[book.category]} • {book.source === "official" ? "Stock" : "P2P"}
         </div>
         <div className="mt-0.5 text-[13px] font-bold leading-snug clamp-2 min-h-[2.5em] text-slate-900">
           {book.title}
