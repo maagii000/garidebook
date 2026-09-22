@@ -1,8 +1,8 @@
 import { db } from "./db";
 
 export const BANK_DEFAULTS = {
-  BANK_NAME: "Төрийн банк",
-  BANK_ACCOUNT: "MN960034340004342702",
+  BANK_NAME: "Хаан банк",
+  BANK_ACCOUNT: "MN700005005075894674",
   BANK_RECEIVER: "Garidebook",
 };
 
