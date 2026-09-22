@@ -59,7 +59,7 @@ export default function BookDetailPage() {
 
   const related = books.filter((b) => b.id !== book.id && b.category === book.category).slice(0, 4);
   const wished = wishlist.includes(book.id);
-  const cover = book.images?.[0];
+  const cover = book.images?.[0] ?? book.coverUrl;
   const isAdmin = (session?.user as { role?: string } | undefined)?.role === "ADMIN";
   const canAccess = !!book.owned || isAdmin;
 

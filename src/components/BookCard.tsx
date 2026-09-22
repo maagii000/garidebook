@@ -7,19 +7,13 @@ import {
   MAX_CREDIT_USE_PER_ORDER,
 } from "@/lib/types";
 import RatingStars from "./RatingStars";
+import CoverArt from "./CoverArt";
 
 const CONDITION_BADGE: Record<string, string> = {
   new: "bg-orange-500",
   like_new: "bg-blue-600",
   good: "bg-emerald-600",
   used: "bg-slate-500",
-};
-
-const COVER_GRADIENT: Record<string, string> = {
-  new: "from-orange-400 to-amber-600",
-  like_new: "from-blue-500 to-indigo-700",
-  good: "from-emerald-500 to-teal-700",
-  used: "from-slate-500 to-slate-700",
 };
 
 export function creditQuote(priceCash: number) {
@@ -52,13 +46,7 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
             className="h-full w-full object-cover group-hover:scale-105 transition duration-300"
           />
         ) : (
-          <div
-            className={`h-full w-full bg-gradient-to-br ${COVER_GRADIENT[book.condition]} flex items-center justify-center p-4`}
-          >
-            <span className="text-white font-extrabold text-sm text-center leading-snug clamp-2">
-              {book.title}
-            </span>
-          </div>
+          <CoverArt book={book} />
         )}
         {/* Нөхцөл badge — зүүн дээд */}
         <span
