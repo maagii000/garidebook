@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 
 const NAV = [
   { href: "/catalog", label: "Каталоги" },
+  { href: "/ads", label: "Зар" },
   { href: "/books/new", label: "Ном нэмэх" },
   { href: "/my-books", label: "Миний номууд" },
   { href: "/wishlist", label: "Хүсэл" },
@@ -174,6 +175,7 @@ export default function Header() {
           </form>
           <nav className="flex flex-col gap-1 text-sm font-bold text-slate-700">
             <Link href="/catalog" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Каталоги</Link>
+            <Link href="/ads" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Зар</Link>
             <Link href="/books/new" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Ном нэмэх (+кредит)</Link>
             <Link href="/my-books" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Миний номууд</Link>
             <Link href="/wishlist" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хүсэл</Link>

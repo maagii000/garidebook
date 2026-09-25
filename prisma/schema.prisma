@@ -117,6 +117,7 @@ model User {
   wishlist      Wishlist[]
   creditTxs     CreditTx[]
   orders        Order[]   @relation("Buyer")
+  ads           Ad[]
 }
 
 model Book {
@@ -267,4 +268,36 @@ model AiQuery {
 model Setting {
   key   String @id
   value String
+}
+
+enum AdStatus {
+  pending
+  active
+  sold
+  rejected
+}
+
+model Ad {
+  id          String   @id @default(cuid())
+  title       String
+  price       Int
+  description String   @default("")
+  contact     String   @default("")
+  status      AdStatus @default(pending)
+  feePaid     Boolean  @default(false)
+  paymentId   String?
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  images      AdImage[]
+  createdAt   DateTime @default(now())
+
+  @@index([status])
+}
+
+model AdImage {
+  id    String @id @default(cuid())
+  adId  String
+  ad    Ad     @relation(fields: [adId], references: [id], onDelete: Cascade)
+  url   String
+  sort  Int    @default(0)
 }

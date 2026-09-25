@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { BookStatus, STATUS_LABEL, Category, Condition } from "@/lib/types";
 
-type Tab = "books" | "add" | "payments" | "ai";
+type Tab = "books" | "add" | "payments" | "ai" | "ads";
 
 interface PendingItem { id: string; title: string; author: string; ownerName: string; createdAt: string; }
+interface PendingAd { id: string; title: string; price: number; description: string; contact: string; owner: string; image: string | null; createdAt: string; }
 interface PayRow {
   id: string; bookTitle: string; buyer: string; amount: number; creditSpent: number;
   status: string; method: string; qpayInvoiceId: string | null; qpayPaymentId: string | null;
@@ -20,6 +21,7 @@ export default function AdminPage() {
   const [pending, setPending] = useState<PendingItem[]>([]);
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [payments, setPayments] = useState<PayRow[]>([]);
+  const [pendingAds, setPendingAds] = useState<PendingAd[]>([]);
   const [aiStats, setAiStats] = useState<{ total: number; byBook: { bookId: string; title: string; count: number }[] }>({ total: 0, byBook: [] });
 
   // add-book form
@@ -46,10 +48,23 @@ export default function AdminPage() {
     fetch("/api/admin/ai-stats").then((r) => r.json()).then((d) => {
       if (typeof d.total === "number") setAiStats(d);
     }).catch(() => {});
+    fetch("/api/admin/ads").then((r) => r.json()).then((d) => {
+      if (d.ads) setPendingAds(d.ads);
+    }).catch(() => {});
   }
   useEffect(load, [books]);
 
   function set(id: string, s: BookStatus) { adminSetStatus(id, s); }
+
+  async function setAd(id: string, s: "active" | "rejected") {
+    const r = await fetch(`/api/ads/${id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: s }),
+    });
+    if (!r.ok) { notify("Алдаа", "err"); return; }
+    notify(s === "active" ? "Зар зөвшөөрөгдлөө" : "Зараас татгалзлаа");
+    load();
+  }
 
   async function savePrice(id: string) {
     const v = Number(prices[id]);
@@ -180,7 +195,7 @@ export default function AdminPage() {
         <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Админ консол</h1>
 
       <div className="mt-4 flex gap-2 text-sm font-bold flex-wrap">
-        {([["books", "Номууд"], ["add", "Ном нэмэх"], ["payments", "Төлбөрүүд"], ["ai", "AI"]] as [Tab, string][]).map(([v, l]) => (
+        {([["books", "Номууд"], ["ads", "Зарууд"], ["add", "Ном нэмэх"], ["payments", "Төлбөрүүд"], ["ai", "AI"]] as [Tab, string][]).map(([v, l]) => (
           <button key={v} onClick={() => setTab(v)}
             className={`rounded-full px-4 py-2 border ${tab === v ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
             {l}
@@ -256,6 +271,38 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {tab === "ads" && (
+        <div>
+          <h2 className="mt-5 text-xl font-extrabold text-navy">Шалгагдаж байгаа зарууд ({pendingAds.length})</h2>
+          {pendingAds.length === 0 && (
+            <div className="mt-3 rounded-2xl bg-sage-light border border-emerald-200 p-5 text-sm text-emerald-800">
+              Бүх зарыг шалгасан байна.
+            </div>
+          )}
+          <div className="mt-3 space-y-3">
+            {pendingAds.map((a) => (
+              <div key={a.id} className="rounded-2xl border bg-white p-4 flex flex-col md:flex-row md:items-center gap-3">
+                {a.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={a.image} alt="" className="h-16 w-16 rounded-lg object-cover border" />
+                ) : (
+                  <div className="h-16 w-16 rounded-lg bg-slate-100 grid place-items-center text-xs font-bold text-slate-400">Зар</div>
+                )}
+                <div className="flex-1">
+                  <div className="font-extrabold">{a.title} • {Number(a.price).toLocaleString()}₮</div>
+                  <div className="text-xs text-slate-500">{a.owner} • {a.contact} • {String(a.createdAt).slice(0, 10)}</div>
+                  {a.description && <div className="mt-1 text-xs text-slate-600">{a.description}</div>}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setAd(a.id, "active")} className="rounded-lg bg-sage px-4 py-2 text-sm font-bold text-white">Зөвшөөрөх</button>
+                  <button onClick={() => setAd(a.id, "rejected")} className="rounded-lg bg-red-100 px-4 py-2 text-sm font-bold text-red-600">Татгалзах</button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

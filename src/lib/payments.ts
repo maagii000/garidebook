@@ -12,6 +12,11 @@ export const PURPOSE_LABEL: Record<PaymentPurpose, string> = {
   MEMBERSHIP: "Гишүүнчлэл",
 };
 
+// Тогтмол хураамжууд (₮)
+export const AD_FEE = 500;
+export const UPLOAD_FEE = 3900;
+export const MEMBERSHIP_MONTHLY = 9900;
+
 // Payment PENDING → QPay шалгах → PAID бол fulfill (idempotent).
 // Returns payment with fresh status.
 export async function syncPayment(paymentId: string) {
