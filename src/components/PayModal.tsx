@@ -13,7 +13,7 @@ interface Props {
   title: string;
   amount: number;
   description: string;
-  purpose: "UPLOAD_FEE" | "AD_FEE" | "MEMBERSHIP";
+  purpose: "UPLOAD_FEE" | "AD_FEE" | "MEMBERSHIP" | "MATERIAL";
   refId?: string;
   onPaid: (paymentId: string) => void;
   onClose: () => void;

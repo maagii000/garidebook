@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { BookStatus, STATUS_LABEL, Category, Condition } from "@/lib/types";
 
-type Tab = "books" | "add" | "payments" | "ai" | "ads";
+type Tab = "books" | "add" | "payments" | "ai" | "ads" | "hub";
 
 interface PendingItem { id: string; title: string; author: string; ownerName: string; createdAt: string; }
 interface PendingAd { id: string; title: string; price: number; description: string; contact: string; owner: string; image: string | null; createdAt: string; }
+interface PendingMaterial { id: string; title: string; subject: string; description: string; fileName: string; fileSize: number; price: number; owner: string; createdAt: string; }
 interface PayRow {
   id: string; bookTitle: string; buyer: string; amount: number; creditSpent: number;
   status: string; method: string; qpayInvoiceId: string | null; qpayPaymentId: string | null;
@@ -22,6 +23,7 @@ export default function AdminPage() {
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [payments, setPayments] = useState<PayRow[]>([]);
   const [pendingAds, setPendingAds] = useState<PendingAd[]>([]);
+  const [pendingMaterials, setPendingMaterials] = useState<PendingMaterial[]>([]);
   const [aiStats, setAiStats] = useState<{ total: number; byBook: { bookId: string; title: string; count: number }[] }>({ total: 0, byBook: [] });
 
   // add-book form
@@ -51,18 +53,30 @@ export default function AdminPage() {
     fetch("/api/admin/ads").then((r) => r.json()).then((d) => {
       if (d.ads) setPendingAds(d.ads);
     }).catch(() => {});
+    fetch("/api/admin/materials").then((r) => r.json()).then((d) => {
+      if (d.materials) setPendingMaterials(d.materials);
+    }).catch(() => {});
   }
   useEffect(load, [books]);
 
   function set(id: string, s: BookStatus) { adminSetStatus(id, s); }
 
-  async function setAd(id: string, s: "active" | "rejected") {
-    const r = await fetch(`/api/ads/${id}`, {
+  async function setAd(id: string, s: "active" | "rejected") {    const r = await fetch(`/api/ads/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: s }),
     });
     if (!r.ok) { notify("Алдаа", "err"); return; }
     notify(s === "active" ? "Зар зөвшөөрөгдлөө" : "Зараас татгалзлаа");
+    load();
+  }
+
+  async function setMaterial(id: string, s: "active" | "rejected") {
+    const r = await fetch(`/api/hub/${id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: s }),
+    });
+    if (!r.ok) { notify("Алдаа", "err"); return; }
+    notify(s === "active" ? "Материал зөвшөөрөгдлөө" : "Материалаас татгалзлаа");
     load();
   }
 
@@ -195,7 +209,7 @@ export default function AdminPage() {
         <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Админ консол</h1>
 
       <div className="mt-4 flex gap-2 text-sm font-bold flex-wrap">
-        {([["books", "Номууд"], ["ads", "Зарууд"], ["add", "Ном нэмэх"], ["payments", "Төлбөрүүд"], ["ai", "AI"]] as [Tab, string][]).map(([v, l]) => (
+        {([["books", "Номууд"], ["ads", "Зарууд"], ["hub", "Материал"], ["add", "Ном нэмэх"], ["payments", "Төлбөрүүд"], ["ai", "AI"]] as [Tab, string][]).map(([v, l]) => (
           <button key={v} onClick={() => setTab(v)}
             className={`rounded-full px-4 py-2 border ${tab === v ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
             {l}
@@ -307,8 +321,35 @@ export default function AdminPage() {
         </div>
       )}
 
-      {tab === "add" && (
-        <div className="mt-5 max-w-3xl rounded-3xl border bg-white p-5 md:p-7 space-y-4">
+      {tab === "hub" && (
+        <div>
+          <h2 className="mt-5 text-xl font-extrabold text-navy">Шалгагдаж байгаа материалууд ({pendingMaterials.length})</h2>
+          {pendingMaterials.length === 0 && (
+            <div className="mt-3 rounded-2xl bg-sage-light border border-emerald-200 p-5 text-sm text-emerald-800">
+              Бүх материалыг шалгасан байна.
+            </div>
+          )}
+          <div className="mt-3 space-y-3">
+            {pendingMaterials.map((m) => (
+              <div key={m.id} className="rounded-2xl border bg-white p-4 flex flex-col md:flex-row md:items-center gap-3">
+                <div className="flex-1">
+                  <div className="font-extrabold">{m.title}</div>
+                  <div className="text-xs text-slate-500">
+                    {m.subject} • {m.fileName} • {m.price > 0 ? `${Number(m.price).toLocaleString()}₮` : "Үнэгүй"} • {m.owner} • {String(m.createdAt).slice(0, 10)}
+                  </div>
+                  {m.description && <div className="mt-1 text-xs text-slate-600">{m.description}</div>}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setMaterial(m.id, "active")} className="rounded-lg bg-sage px-4 py-2 text-sm font-bold text-white">Зөвшөөрөх</button>
+                  <button onClick={() => setMaterial(m.id, "rejected")} className="rounded-lg bg-red-100 px-4 py-2 text-sm font-bold text-red-600">Татгалзах</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tab === "add" && (        <div className="mt-5 max-w-3xl rounded-3xl border bg-white p-5 md:p-7 space-y-4">
           <h2 className="text-xl font-extrabold text-navy">Ebook нэмэх (PDF + AI)</h2>
           <label className="block rounded-2xl border-2 border-dashed border-slate-300 bg-paper p-6 text-center cursor-pointer hover:border-accent"
             onClick={() => document.getElementById("admin-pdf")?.click()}>

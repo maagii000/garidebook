@@ -27,5 +27,6 @@ export const config = {
     "/read/:path*",
     "/admin/:path*",
     "/ads/new",
+    "/hub/new",
   ],
 };

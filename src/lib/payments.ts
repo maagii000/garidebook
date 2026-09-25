@@ -2,7 +2,7 @@ import { db } from "./db";
 import { checkInvoice, createEbarimt } from "./qpay";
 import { CREDIT_TO_MNT } from "./types";
 
-export const PAYMENT_PURPOSES = ["BOOK", "UPLOAD_FEE", "AD_FEE", "MEMBERSHIP"] as const;
+export const PAYMENT_PURPOSES = ["BOOK", "UPLOAD_FEE", "AD_FEE", "MEMBERSHIP", "MATERIAL"] as const;
 export type PaymentPurpose = (typeof PAYMENT_PURPOSES)[number];
 
 export const PURPOSE_LABEL: Record<PaymentPurpose, string> = {
@@ -10,6 +10,7 @@ export const PURPOSE_LABEL: Record<PaymentPurpose, string> = {
   UPLOAD_FEE: "Файл оруулах хураамж",
   AD_FEE: "Зар байршуулах хураамж",
   MEMBERSHIP: "Гишүүнчлэл",
+  MATERIAL: "Материал худалдан авалт",
 };
 
 // Тогтмол хураамжууд (₮)
