@@ -66,7 +66,7 @@ export default function Hero({ bookCount }: { bookCount: number }) {
         <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
           <div className="hero-enter inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 text-brand text-xs font-semibold tracking-wide">
             <SparklesIcon />
-            <span>Сурагчдын ном солилцох платформ</span>
+            <span>Сурагчдын ухаалаг хөгжих орчин</span>
           </div>
           <h1 className="hero-enter text-4xl sm:text-6xl font-extrabold tracking-tight text-black leading-[1.1]" style={{ "--hero-delay": "80ms" } as CSSProperties}>
             Илүү ухаалаг унш, <br /><span className="text-brand">Хамтдаа хэмнэ.</span>
@@ -99,8 +99,8 @@ export default function Hero({ bookCount }: { bookCount: number }) {
           </div>
         </div>
 
-        <div className="lg:col-span-5 hidden md:flex items-center justify-center relative min-h-[380px]">
-          <div className="relative w-72 h-72 sm:w-80 sm:h-80 flex items-center justify-center">
+        <div className="lg:col-span-5 flex items-center justify-center relative min-h-[300px] md:min-h-[380px] overflow-hidden">
+          <div className="relative w-60 h-60 sm:w-72 sm:h-72 md:w-72 md:h-72 lg:w-80 lg:h-80 flex items-center justify-center scale-90 sm:scale-100">
             <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-white to-[#F5F5F7] border border-gray-200 shadow-2xl flex flex-col items-center justify-center z-20 relative p-4 text-center">
               <div className="w-12 h-12 rounded-2xl bg-brand/10 flex items-center justify-center text-brand mb-2">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
