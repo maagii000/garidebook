@@ -10,6 +10,7 @@ const NAV = [
   { href: "/catalog", label: "Каталоги" },
   { href: "/ads", label: "Зар" },
   { href: "/hub", label: "Мэдлэг" },
+  { href: "/membership", label: "Гишүүнчлэл" },
   { href: "/books/new", label: "Ном нэмэх" },
   { href: "/my-books", label: "Миний номууд" },
   { href: "/wishlist", label: "Хүсэл" },
@@ -35,17 +36,13 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-100">
+    <header className="glass-nav sticky top-0 z-40">
       {/* Дээд эгнээ: logo + search + кредит + profile */}
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 font-extrabold text-xl shrink-0">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-navy text-white text-lg">
-              G
-            </span>
-            <span className="text-slate-900">
-              Garide<span className="text-accent">book</span>
-            </span>
+          <Link href="/" className="flex items-center shrink-0 text-2xl" aria-label="Garidebook">
+            <span className="font-extrabold tracking-tight text-black">Garide</span>
+            <span className="ml-0.5 rounded bg-accent px-1.5 py-0.5 text-sm font-extrabold text-white">book</span>
           </Link>
 
           <form
@@ -69,11 +66,9 @@ export default function Header() {
               <Link
                 href="/profile"
                 title="Кредит данс"
-                className="flex items-center gap-1.5 rounded-full bg-accent-light px-3.5 py-2 text-sm font-extrabold text-accent-dark hover:bg-orange-100 transition"
+                className="flex items-center gap-1.5 rounded-full bg-white/80 border border-gray-200 px-3 py-1.5 text-sm font-semibold shadow-sm hover:border-slate-300 transition"
               >
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-accent text-white text-xs">
-                  ●
-                </span>
+                <span className="h-2 w-2 rounded-full bg-brand" />
                 {credit} кр
               </Link>
             )}
@@ -124,8 +119,8 @@ export default function Header() {
               <Link
                 key={n.href}
                 href={n.href}
-                className={`relative py-3 hover:text-navy transition ${
-                  active ? "text-blue-600" : ""
+                className={`relative py-3 hover:text-black transition ${
+                  active ? "text-black" : ""
                 }`}
               >
                 {n.label}
@@ -135,7 +130,7 @@ export default function Header() {
                   </span>
                 )}
                 {active && (
-                  <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-blue-600" />
+                  <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-black" />
                 )}
               </Link>
             );
@@ -143,13 +138,13 @@ export default function Header() {
           {isAdmin && (
             <Link
               href="/admin"
-              className={`relative py-3 hover:text-navy ${
-                pathname === "/admin" ? "text-blue-600" : ""
+              className={`relative py-3 hover:text-black ${
+                pathname === "/admin" ? "text-black" : ""
               }`}
             >
               Админ
               {pathname === "/admin" && (
-                <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-blue-600" />
+                <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-black" />
               )}
             </Link>
           )}
@@ -178,6 +173,7 @@ export default function Header() {
             <Link href="/catalog" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Каталоги</Link>
             <Link href="/ads" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Зар</Link>
             <Link href="/hub" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Мэдлэг</Link>
+            <Link href="/membership" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Гишүүнчлэл</Link>
             <Link href="/books/new" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Ном нэмэх (+кредит)</Link>
             <Link href="/my-books" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Миний номууд</Link>
             <Link href="/wishlist" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хүсэл</Link>

@@ -18,7 +18,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="mn" className="h-full">
-      <body className="min-h-full flex flex-col bg-paper text-slate-800">
+      <body className="min-h-full flex flex-col bg-paper text-slate-800 antialiased relative">
+        {/* Blob дэвсгэр (Level Hub хэл) */}
+        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden>
+          <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-100/40 mix-blend-multiply blur-[100px] animate-blob" />
+          <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-gray-200/50 mix-blend-multiply blur-[100px] animate-blob" style={{ animationDelay: "2s" }} />
+          <div className="absolute bottom-[-20%] left-[20%] w-[60vw] h-[60vw] rounded-full bg-slate-100/60 mix-blend-multiply blur-[120px] animate-blob" style={{ animationDelay: "4s" }} />
+        </div>
         <AuthProvider>
           <StoreProvider>
             <Header />

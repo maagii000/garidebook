@@ -32,7 +32,7 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
   return (
     <Link
       href={`/books/${book.id}`}
-      className={`group shrink-0 overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 ${className}`}
+      className={`group card-hover shrink-0 overflow-hidden rounded-[1.5rem] bg-white border border-gray-100 shadow-apple ${className}`}
     >
       {/* Босоо ковер 3:4 — хурц (тавиур мэдрэмж) */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-slate-100 m-2 mb-0">

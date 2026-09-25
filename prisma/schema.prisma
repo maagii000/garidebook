@@ -121,6 +121,7 @@ model User {
   ads           Ad[]
   materials     Material[]
   materialAccess MaterialAccess[]
+  memberships   Membership[]
 }
 
 model Book {
@@ -340,4 +341,30 @@ model MaterialAccess {
 
   @@id([userId, materialId])
   @@index([materialId])
+}
+
+enum MembershipPlan {
+  BASE
+  PRO
+}
+
+enum MembershipStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model Membership {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      MembershipPlan
+  status    MembershipStatus @default(ACTIVE)
+  freeTrial Boolean          @default(false)
+  paymentId String?
+  startsAt  DateTime         @default(now())
+  endsAt    DateTime
+  createdAt DateTime         @default(now())
+
+  @@index([userId, status])
 }
