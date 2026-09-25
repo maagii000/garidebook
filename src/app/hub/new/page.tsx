@@ -162,7 +162,7 @@ export default function NewMaterialPage() {
         <PayModal
           title="Материал оруулах хураамж"
           amount={UPLOAD_FEE}
-          description="Garidebook Hub: файл оруулах"
+          description="Level Hub: файл оруулах"
           purpose="UPLOAD_FEE"
           onPaid={(pid) => { setShowPay(false); publishWithPayment(pid); }}
           onClose={() => setShowPay(false)}

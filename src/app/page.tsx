@@ -116,7 +116,7 @@ export default function Home() {
           totalCount={rails.p2p.total}
         />
         <BookRail
-          title="Garidebook Stock"
+          title="Level Up Stock"
           subtitle="Албан ёсны баталгаат нөөц"
           href="/catalog"
           books={rails.official.books}
@@ -141,10 +141,10 @@ export default function Home() {
         <AppDownload />
       </Reveal>
 
-      {/* 6. Яагаад Garidebook? */}
+      {/* 6. Яагаад Level Up Hub? */}
       <div className="mx-auto max-w-7xl px-4">
         <Reveal as="section" className="mt-12">
-          <h2 className="text-lg md:text-xl font-extrabold text-slate-900">Яагаад Garidebook?</h2>
+          <h2 className="text-lg md:text-xl font-extrabold text-slate-900">Яагаад Level Up Hub?</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             {[
               ["Хямд ав", "Суурь 5,000₮ — кредитээр 3,000₮ хүртэл хямдарна.", "bg-emerald-50 border-emerald-100"],

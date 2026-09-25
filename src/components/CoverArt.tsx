@@ -35,7 +35,7 @@ export default function CoverArt({ book, className = "" }: { book: Book; classNa
           <div className="mt-1 text-xs font-medium text-white/75 truncate">{book.author}</div>
         </div>
         <div className="text-[9px] font-bold tracking-widest text-white/40">
-          GARIDEBOOK
+          LEVEL UP HUB
         </div>
       </div>
     </div>

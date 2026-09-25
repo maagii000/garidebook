@@ -6,9 +6,9 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-brand flex items-center justify-center text-white font-bold text-xs">G</div>
-          <span className="font-bold text-sm text-black">Garidebook</span>
+          <span className="font-bold text-sm text-black">Level Up Hub</span>
         </div>
-        <p className="text-xs text-slate-500">© 2026 Garidebook • Prototype / MVP • UFE төсөл</p>
+        <p className="text-xs text-slate-500">© 2026 Level Up Hub • Prototype / MVP • UFE төсөл</p>
         <div className="flex items-center gap-4 text-xs text-slate-500">
           <Link href="/catalog" className="hover:text-black">Каталоги</Link>
           <Link href="/profile" className="hover:text-black">Тусламж</Link>

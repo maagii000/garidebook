@@ -43,7 +43,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ---------- Garidebook ----------
+// ---------- Level Up Hub ----------
 enum Role {
   USER
   ADMIN

@@ -16,7 +16,7 @@ export default function StudioShowcase({ books }: { books: Book[] }) {
   return (
     <section className="mx-auto max-w-7xl px-4 mt-12">
       <h2 className="hero-enter text-center text-xl md:text-2xl font-extrabold text-slate-900">
-        <span className="text-blue-600">Garidebook</span> студи-с толилуулж буй бүтээлүүд
+        <span className="text-blue-600">Level Up Hub</span> студи-с толилуулж буй бүтээлүүд
       </h2>
       <div className="mt-6 grid gap-6 md:grid-cols-[280px_1fr] items-start">
         {/* Утасны mockup — одоогийн онцлох ном */}

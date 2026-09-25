@@ -111,7 +111,7 @@ export default function BookDetailPage() {
             <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">{CONDITION_LABEL[book.condition]}</span>
             <span className="rounded-full bg-sage-light px-3 py-1 text-emerald-700">{STATUS_LABEL[book.status]}</span>
             <span className="rounded-full bg-accent-light px-3 py-1 text-accent-dark">
-              {book.source === "official" ? "Garidebook Stock" : "Сурагчийн зар (P2P)"}
+              {book.source === "official" ? "Level Up Stock" : "Сурагчийн зар (P2P)"}
             </span>
           </div>
 

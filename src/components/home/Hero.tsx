@@ -108,7 +108,7 @@ export default function Hero({ bookCount }: { bookCount: number }) {
                   <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
                 </svg>
               </div>
-              <span className="font-extrabold text-sm tracking-tight text-black">GARIDEBOOK</span>
+              <span className="font-extrabold text-sm tracking-tight text-black">LEVEL UP HUB</span>
               <span className="text-[10px] text-slate-500 font-medium">Credit Engine</span>
             </div>
             <div className="absolute inset-0 rounded-full border border-gray-200/40 animate-spin" style={{ animationDuration: "35s" }} />

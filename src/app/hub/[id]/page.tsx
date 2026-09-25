@@ -99,7 +99,7 @@ export default function HubDetailPage() {
         <PayModal
           title={m.title}
           amount={m.price}
-          description={`Garidebook Hub: ${m.title}`.slice(0, 60)}
+          description={`Level Hub: ${m.title}`.slice(0, 60)}
           purpose="MATERIAL"
           refId={m.id}
           onPaid={() => { setShowPay(false); load(); }}

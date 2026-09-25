@@ -138,7 +138,7 @@ export default function NewAdPage() {
         <PayModal
           title="Зар байршуулах хураамж"
           amount={AD_FEE}
-          description="Garidebook: зар байршуулах"
+          description="LevelUp: зар байршуулах"
           purpose="AD_FEE"
           onPaid={(pid) => { setShowPay(false); publishWithPayment(pid); }}
           onClose={() => setShowPay(false)}

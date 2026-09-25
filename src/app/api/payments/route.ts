@@ -43,13 +43,13 @@ export async function POST(req: NextRequest) {
         creditUsed: 0,
         transfer: true,
         bank,
-        ref: `GB-${payment.id.slice(0, 8).toUpperCase()}`,
+        ref: `LU-${payment.id.slice(0, 8).toUpperCase()}`,
       });
     }
 
     const origin = originOf(req);
     const inv = await createInvoice({
-      senderInvoiceNo: `GB-${payment.id.slice(0, 8).toUpperCase()}`,
+      senderInvoiceNo: `LU-${payment.id.slice(0, 8).toUpperCase()}`,
       description: (description || PURPOSE_LABEL[purpose as keyof typeof PURPOSE_LABEL]).slice(0, 60),
       amount: fee,
       callbackUrl: `${origin}/api/payments/qpay-callback?pid=${payment.id}`,
@@ -102,14 +102,14 @@ export async function POST(req: NextRequest) {
       creditUsed: use,
       transfer: true,
       bank,
-      ref: `GB-${payment.id.slice(0, 8).toUpperCase()}`,
+      ref: `LU-${payment.id.slice(0, 8).toUpperCase()}`,
     });
   }
 
   const origin = originOf(req);
   const inv = await createInvoice({
-    senderInvoiceNo: `GB-${payment.id.slice(0, 8).toUpperCase()}`,
-    description: `Garidebook: ${book.title}`.slice(0, 60),
+    senderInvoiceNo: `LU-${payment.id.slice(0, 8).toUpperCase()}`,
+      description: `LevelUp: ${book.title}`.slice(0, 60),
     amount: cash,
     callbackUrl: `${origin}/api/payments/qpay-callback?pid=${payment.id}`,
   });

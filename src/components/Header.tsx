@@ -44,11 +44,9 @@ export default function Header() {
       {/* Дээд эгнээ: logo + search + кредит + profile */}
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center gap-3">
-          <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Garidebook">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-white font-extrabold shadow-md">
-              G
-            </span>
-            <span className="font-bold text-lg tracking-tight text-black">Garidebook</span>
+          <Link href="/" className="flex items-center shrink-0" aria-label="Level Up Hub">
+            <span className="font-extrabold tracking-tight text-black text-[22px]">Level</span>
+            <span className="ml-1 rounded bg-accent px-1.5 py-0.5 text-[13px] font-extrabold text-white">Up Hub</span>
           </Link>
 
           <form

@@ -221,7 +221,7 @@ export default function MembershipPage() {
         <PayModal
           title={`${payFor} багц — 30 хоног`}
           amount={MEMBERSHIP_PRICES[payFor]}
-          description={`Garidebook: ${payFor} гишүүнчлэл`}
+          description={`LevelUp: ${payFor} гишүүнчлэл`}
           purpose="MEMBERSHIP"
           onPaid={(pid) => { setPayFor(null); confirmPaid(payFor, pid); }}
           onClose={() => setPayFor(null)}

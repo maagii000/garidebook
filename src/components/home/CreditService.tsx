@@ -18,7 +18,7 @@ export default function CreditService() {
         Уншсан номоо оруулаад хямд ном ав — P2P эргэлтэд
       </p>
       <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500">
-        Монголын сурагчдын анхны ном солилцох кредит платформ Garidebook Танд хүрч байна.
+        Монголын сурагчдын анхны ном солилцох кредит платформ Level Up Hub Танд хүрч байна.
         Уншсан номоо оруулаад кредит цуглуулж, хямд үнээр илүү их унших боломжийг нээгээрэй.
       </p>
 
@@ -26,7 +26,7 @@ export default function CreditService() {
         <div className="px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1">
             <div className="text-xs font-extrabold uppercase tracking-widest text-white/60">
-              Garidebook Stock
+              Level Up Stock
             </div>
             <div className="mt-1 text-2xl md:text-3xl font-extrabold leading-tight">
               Суурь 5,000₮ → кредитээр 3,000₮

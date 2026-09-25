@@ -17,7 +17,7 @@ function LoginInner() {
           </div>
         )}
         <p className="text-sm text-slate-500 mt-1">
-          Garidebook-д Google хаягаараа нэвтэрч кредитээ удирдаарай.
+          Level Up Hub-д Google хаягаараа нэвтэрч кредитээ удирдаарай.
         </p>
 
         <button

@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Garidebook — Ном солилцох кредит платформ",
+  title: "Level Up Hub — Ном солилцох кредит платформ",
   description:
     "Уншсан номоо оруулж кредит цуглуул, кредит + мөнгөөр хямд ном ав. ЕБС сурагч, оюутанд зориулсан P2P номын маркетплейс.",
 };

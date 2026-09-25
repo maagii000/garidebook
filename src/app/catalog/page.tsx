@@ -11,7 +11,7 @@ type SourceTab = "all" | "official" | "user";
 
 const TABS: [SourceTab, string][] = [
   ["all", "Бүгд"],
-  ["official", "Garidebook Stock"],
+  ["official", "Level Up Stock"],
   ["user", "Сурагчдын (P2P)"],
 ];
 
@@ -65,7 +65,7 @@ function CatalogInner() {
     <div className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">Каталоги</h1>
       <p className="text-sm text-slate-500 mt-1">
-        Garidebook Stock (албан ёсны) + сурагчдын P2P зарууд — нийт {list.length} ном
+        Level Up Stock (албан ёсны) + сурагчдын P2P зарууд — нийт {list.length} ном
       </p>
 
       <div className="mt-5 flex flex-col lg:flex-row gap-3 lg:items-center">
