@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { CREDIT_TO_MNT, MAX_CREDIT_USE_PER_ORDER } from "@/lib/types";
+import { CountUp } from "@/components/Reveal";
 
-const STATS: [string, string][] = [
-  ["60–120", "ном оруулахад"],
-  ["10₮", "1 кредит ="],
-  ["200кр", "max / захиалга"],
+const STATS: { to: number; prefix: string; suffix: string; label: string }[] = [
+  { to: 120, prefix: "60–", suffix: "", label: "ном оруулахад" },
+  { to: 10, prefix: "", suffix: "₮", label: "1 кредит =" },
+  { to: 200, prefix: "", suffix: "кр", label: "max / захиалга" },
 ];
 
 export default function CreditService() {
@@ -50,10 +51,12 @@ export default function CreditService() {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2 md:gap-6 text-center w-full md:w-auto">
-            {STATS.map(([v, l]) => (
-              <div key={l} className="rounded-2xl bg-white/10 px-2 py-3 md:px-5 md:py-4 md:min-w-[110px]">
-                <div className="text-base md:text-xl font-extrabold whitespace-nowrap">{v}</div>
-                <div className="mt-0.5 text-[10px] md:text-[11px] text-white/65 leading-tight">{l}</div>
+            {STATS.map((s) => (
+              <div key={s.label} className="rounded-2xl bg-white/10 px-2 py-3 md:px-5 md:py-4 md:min-w-[110px]">
+                <div className="text-base md:text-xl font-extrabold whitespace-nowrap">
+                  <CountUp to={s.to} prefix={s.prefix} suffix={s.suffix} />
+                </div>
+                <div className="mt-0.5 text-[10px] md:text-[11px] text-white/65 leading-tight">{s.label}</div>
               </div>
             ))}
           </div>

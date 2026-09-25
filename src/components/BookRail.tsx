@@ -2,26 +2,31 @@ import Link from "next/link";
 import { useRef } from "react";
 import { Book } from "@/lib/types";
 import BookCard from "./BookCard";
+import { Reveal } from "./Reveal";
 
 interface Props {
   title: string;
   subtitle?: string;
   href?: string;
   books: Book[];
+  totalCount?: number;
   emptyText?: string;
   badge?: string;
+  minCount?: number;
 }
 
-export default function BookRail({ title, subtitle, href, books, emptyText, badge }: Props) {
+export default function BookRail({ title, subtitle, href, books, totalCount, emptyText, badge, minCount = 3 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const scrollBy = (dir: 1 | -1) => {
     ref.current?.scrollBy({ left: dir * 400, behavior: "smooth" });
   };
 
   if (books.length === 0) return null;
+  // Ном цөөхөн rail-ийг нуух (давхардлыг багасгана)
+  if (books.length < minCount) return null;
 
   return (
-    <section className="mt-10">
+    <Reveal as="section" className="mt-10 cv-auto">
       <div className="flex items-end justify-between gap-3">
         <div>
           <h2 className="text-lg md:text-xl font-extrabold text-slate-900 flex items-center gap-2">
@@ -51,7 +56,7 @@ export default function BookRail({ title, subtitle, href, books, emptyText, badg
           </button>
           {href && (
             <Link href={href} className="text-xs font-bold text-blue-600 hover:underline whitespace-nowrap">
-              Бүгдийг үзэх ({books.length}) →
+              Бүгдийг үзэх ({totalCount ?? books.length}) →
             </Link>
           )}
         </div>
@@ -64,6 +69,6 @@ export default function BookRail({ title, subtitle, href, books, emptyText, badg
       {books.length === 0 && emptyText && (
         <p className="mt-3 text-sm text-slate-400">{emptyText}</p>
       )}
-    </section>
+    </Reveal>
   );
 }

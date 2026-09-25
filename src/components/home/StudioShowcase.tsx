@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Book } from "@/lib/types";
 import BookCard from "@/components/BookCard";
@@ -14,12 +15,12 @@ export default function StudioShowcase({ books }: { books: Book[] }) {
 
   return (
     <section className="mx-auto max-w-7xl px-4 mt-12">
-      <h2 className="text-center text-xl md:text-2xl font-extrabold text-slate-900">
+      <h2 className="hero-enter text-center text-xl md:text-2xl font-extrabold text-slate-900">
         <span className="text-blue-600">Garidebook</span> студи-с толилуулж буй бүтээлүүд
       </h2>
       <div className="mt-6 grid gap-6 md:grid-cols-[280px_1fr] items-start">
         {/* Утасны mockup — одоогийн онцлох ном */}
-        <div className="mx-auto w-[240px] shrink-0 rounded-[2.2rem] border-[10px] border-slate-900 bg-slate-900 shadow-2xl overflow-hidden">
+        <div className="hero-enter mx-auto w-[240px] shrink-0 rounded-[2.2rem] border-[10px] border-slate-900 bg-slate-900 shadow-2xl overflow-hidden" style={{ "--hero-delay": "120ms" } as CSSProperties}>
           <div className="relative bg-white">
             <div className="absolute left-1/2 top-2 h-5 w-24 -translate-x-1/2 rounded-full bg-slate-900" aria-hidden />
             <div className="pt-9 pb-4 px-4">
@@ -49,7 +50,7 @@ export default function StudioShowcase({ books }: { books: Book[] }) {
         </div>
 
         {/* номын эгнээ */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
+        <div className="hero-enter rounded-3xl border border-slate-100 bg-white p-4 shadow-sm" style={{ "--hero-delay": "240ms" } as CSSProperties}>
           <div className="flex items-center justify-between px-1">
             <div className="text-sm font-extrabold text-slate-900">Шинэ нэмэгдсэн</div>
             <Link href="/catalog" className="text-xs font-bold text-blue-600 hover:underline whitespace-nowrap">

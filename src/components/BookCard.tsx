@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   Book,
-  CATEGORY_LABEL,
   CONDITION_LABEL,
   CREDIT_TO_MNT,
   MAX_CREDIT_USE_PER_ORDER,
@@ -62,20 +61,19 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
       </div>
 
       <div className="p-3">
-        <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400 truncate">
-          {CATEGORY_LABEL[book.category]} • {book.source === "official" ? "Stock" : "P2P"}
-        </div>
-        <div className="mt-0.5 text-[13px] font-bold leading-snug clamp-2 min-h-[2.5em] text-slate-900">
+        <div className="text-[13px] font-bold leading-snug clamp-2 min-h-[2.5em] text-slate-900">
           {book.title}
         </div>
         <div className="text-xs text-slate-500 truncate">{book.author}</div>
 
-        <div className="mt-1.5 flex items-center gap-1">
-          <RatingStars value={book.avgRating} />
-          <span className="text-[11px] text-slate-400">
-            {book.avgRating > 0 ? book.avgRating.toFixed(1) : "—"}
-          </span>
-        </div>
+        {book.reviewCount > 0 && (
+          <div className="mt-1.5 flex items-center gap-1">
+            <RatingStars value={book.avgRating} />
+            <span className="text-[11px] text-slate-400">
+              {book.avgRating > 0 ? book.avgRating.toFixed(1) : "—"} ({book.reviewCount})
+            </span>
+          </div>
+        )}
 
         {/* Кредит-first үнэ блок */}
         <div className="mt-2 rounded-xl bg-slate-50 px-2.5 py-2">
@@ -86,6 +84,9 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
             <span className="text-sm font-extrabold text-navy">
               {q.finalCash.toLocaleString()}₮
             </span>
+            {book.source !== "official" && (
+              <span className="ml-auto text-[10px] font-bold text-slate-400">P2P</span>
+            )}
           </div>
           <div className="mt-0.5 text-[11px] font-bold text-accent-dark">
             {q.creditNeeded}кр → −{q.discount.toLocaleString()}₮

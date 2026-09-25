@@ -63,3 +63,67 @@ body {
 input[type="range"].credit-range {
   accent-color: #ff7a00;
 }
+
+/* ---- Хөнгөн motion систем (сан 0KB) ----
+   1) view-timeline дэмждэг browser: CSS-ээр автоматаар (JS 0)
+   2) Бусад: Reveal.tsx IntersectionObserver-оор .in нэмнэ
+   Зөвхөн transform + opacity (compositor, layout thrash үгүй) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+@supports (animation-timeline: view()) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    animation: reveal-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 25%;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal.in {
+    transition: none;
+    animation: reveal-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 25%;
+  }
+}
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Hero entrance */
+@keyframes hero-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+.hero-enter {
+  opacity: 0;
+  animation: hero-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--hero-delay, 0ms);
+}
+
+/* Урт rail-ууд: харагдахгүй DOM-ыг алгасах */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal.in, .hero-enter {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

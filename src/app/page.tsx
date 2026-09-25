@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import BookRail from "@/components/BookRail";
+import { Reveal } from "@/components/Reveal";
 import StudioShowcase from "@/components/home/StudioShowcase";
 import CreditService from "@/components/home/CreditService";
 import Testimonials from "@/components/home/Testimonials";
@@ -34,6 +35,26 @@ export default function Home() {
     [recentIds, active]
   );
 
+  // Rail давхардлыг арилгах: үзүүлсэн номоо дараагийн rail-д оруулахгүй
+  const rails = useMemo(() => {
+    const seen = new Set<string>();
+    const pick = (list: Book[]) => {
+      const out = list.filter((b) => !seen.has(b.id)).slice(0, 10);
+      out.forEach((b) => seen.add(b.id));
+      return out;
+    };
+    const rRecent = recent.filter((b) => !seen.has(b.id));
+    rRecent.forEach((b) => seen.add(b.id));
+    return {
+      recent: rRecent,
+      fresh: { total: fresh.length, books: pick(fresh) },
+      cheap: { total: cheapWithCredit.length, books: pick(cheapWithCredit) },
+      p2p: { total: p2p.length, books: pick(p2p) },
+      official: { total: official.length, books: pick(official) },
+      top: { total: topRated.length, books: pick(topRated) },
+    };
+  }, [recent, fresh, cheapWithCredit, p2p, official, topRated]);
+
   return (
     <div className="pb-10">
       {/* 1. Студи showcase */}
@@ -55,64 +76,76 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <StudioShowcase books={fresh} />
+        <Reveal>
+          <StudioShowcase books={fresh} />
+        </Reveal>
       )}
 
       {/* 2. Кредит үйлчилгээ */}
-      <CreditService />
+      <Reveal>
+        <CreditService />
+      </Reveal>
 
       {/* 3. Rails */}
       <div className="mx-auto max-w-7xl px-4">
-        {recent.length > 0 && (
+        {rails.recent.length > 0 && (
           <BookRail
             title="Саяхан үзсэн"
             subtitle="Үргэлжлүүлэн сонирхоорой"
             href="/catalog"
-            books={recent}
+            books={rails.recent}
           />
         )}
         <BookRail
           title="Кредитээр хамгийн хямд"
           subtitle={`200кр ашиглавал −${(MAX_CREDIT_USE_PER_ORDER * CREDIT_TO_MNT).toLocaleString()}₮ хямдарна`}
           href="/catalog"
-          books={cheapWithCredit}
+          books={rails.cheap.books}
+          totalCount={rails.cheap.total}
           badge="−2,000₮"
         />
         <BookRail
           title="Сурагчдын P2P зарууд"
           subtitle="Хямд, эргэлтэд орсон номууд"
           href="/catalog"
-          books={p2p}
+          books={rails.p2p.books}
+          totalCount={rails.p2p.total}
         />
         <BookRail
           title="Garidebook Stock"
           subtitle="Албан ёсны баталгаат нөөц"
           href="/catalog"
-          books={official}
+          books={rails.official.books}
+          totalCount={rails.official.total}
         />
         <BookRail
           title="Өндөр үнэлгээтэй"
           subtitle="Сурагчдын сэтгэгдлээр"
           href="/catalog"
-          books={topRated}
+          books={rails.top.books}
+          totalCount={rails.top.total}
         />
       </div>
 
       {/* 4. Сэтгэгдэл */}
-      <Testimonials />
+      <Reveal>
+        <Testimonials />
+      </Reveal>
 
       {/* 5. Апп татах */}
-      <AppDownload />
+      <Reveal>
+        <AppDownload />
+      </Reveal>
 
       {/* 6. Яагаад Garidebook? */}
       <div className="mx-auto max-w-7xl px-4">
-        <section className="mt-12">
+        <Reveal as="section" className="mt-12">
           <h2 className="text-lg md:text-xl font-extrabold text-slate-900">Яагаад Garidebook?</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             {[
-              ["MORE GOOD", "Хямд ном + уншаад урамшуулал + идэвхтэй уншлагын нийгэмлэг.", "bg-emerald-50 border-emerald-100"],
-              ["LESS BAD", "Шинэ номын өндөр зардал буурна, гэрт ашиглагддаггүй ном эргэлтэд орно.", "bg-orange-50 border-orange-100"],
-              ["TARGET", "ЕБС сурагч, оюутан, залуу уншигчдад зориулсан.", "bg-indigo-50 border-indigo-100"],
+              ["Хямд ав", "Суурь 5,000₮ — кредитээр 3,000₮ хүртэл хямдарна.", "bg-emerald-50 border-emerald-100"],
+              ["Кредит цуглуул", "Уншсан номоо оруулаад +60~120 кредит авна.", "bg-orange-50 border-orange-100"],
+              ["Солилцож эргэлтэд оруул", "Гэрт ашиглагддаггүй номоо сурагчдад хүргэ.", "bg-indigo-50 border-indigo-100"],
             ].map(([t, d, c]) => (
               <div key={t} className={`rounded-2xl border p-5 bg-white ${c}`}>
                 <div className="font-extrabold text-sm">{t}</div>
@@ -120,7 +153,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </section>
+        </Reveal>
       </div>
     </div>
   );
