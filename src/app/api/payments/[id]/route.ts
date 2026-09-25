@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, unauthorized } from "@/lib/api-auth";
-import { syncPayment } from "@/lib/payments";
+import { syncPayment, PURPOSE_LABEL } from "@/lib/payments";
 
 // GET /api/payments/[id] — төлөв шалгах (QPay-тэй синк хийнэ)
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       creditSpent: synced.creditSpent,
       orderId: synced.orderId,
       ebarimtId: synced.ebarimtId,
-      bookTitle: row.book.title,
+      bookTitle: row.book?.title ?? PURPOSE_LABEL[row.purpose as keyof typeof PURPOSE_LABEL] ?? "Төлбөр",
       credit: fresh?.credit ?? 0,
     });
   } catch (e) {

@@ -12,6 +12,7 @@ interface PayState {
   creditUsed: number;
   qr_image: string;
   shortUrl?: string;
+  bankApps?: { name: string; description: string; logo: string; link: string }[];
 }
 
 interface TransferState {
@@ -175,6 +176,24 @@ export default function CheckoutPage() {
           <a href={pay.shortUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-bold text-accent-dark hover:underline">
             Утаснаасаа шууд төлөх →
           </a>
+        )}
+        {pay.bankApps && pay.bankApps.length > 0 && (
+          <div className="mt-4 rounded-2xl border bg-white p-4 text-left">
+            <div className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Банк апп сонгох</div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {pay.bankApps.map((b) => (
+                <a key={b.name} href={b.link} target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2.5 rounded-xl border border-slate-200 px-3 py-2.5 hover:border-navy hover:bg-navy-light/40 transition">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={b.logo} alt="" className="h-8 w-8 rounded-lg object-contain bg-white" />
+                  <span className="min-w-0">
+                    <span className="block truncate text-[13px] font-extrabold text-slate-800">{b.name}</span>
+                    <span className="block truncate text-[11px] text-slate-400">{b.description}</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
         )}
         <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
           <span className="h-3 w-3 animate-ping rounded-full bg-sage" /> Төлбөр хүлээж байна...

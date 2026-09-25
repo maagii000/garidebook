@@ -2,6 +2,16 @@ import { db } from "./db";
 import { checkInvoice, createEbarimt } from "./qpay";
 import { CREDIT_TO_MNT } from "./types";
 
+export const PAYMENT_PURPOSES = ["BOOK", "UPLOAD_FEE", "AD_FEE", "MEMBERSHIP"] as const;
+export type PaymentPurpose = (typeof PAYMENT_PURPOSES)[number];
+
+export const PURPOSE_LABEL: Record<PaymentPurpose, string> = {
+  BOOK: "Номын төлбөр",
+  UPLOAD_FEE: "Файл оруулах хураамж",
+  AD_FEE: "Зар байршуулах хураамж",
+  MEMBERSHIP: "Гишүүнчлэл",
+};
+
 // Payment PENDING → QPay шалгах → PAID бол fulfill (idempotent).
 // Returns payment with fresh status.
 export async function syncPayment(paymentId: string) {
@@ -33,7 +43,32 @@ export async function fulfillPayment(paymentId: string, qpayPaymentId?: string) 
     if (!payment) throw new Error("Төлбөр олдсонгүй");
     if (payment.status === "PAID") return payment;
 
+    // Номноос бусад зориулалт: төлбөрийг PAID болгоод хаах (side-effect-ийг
+    // зориулалтын модулиуд — hub/ads/membership — гүйцэтгэнэ).
+    if (payment.purpose !== "BOOK") {
+      let ebarimtId: string | undefined;
+      if (payment.amount > 0 && qpayPaymentId) {
+        try {
+          const eb = await createEbarimt(qpayPaymentId, "CITIZEN");
+          ebarimtId = (eb as { id?: string }).id;
+        } catch {
+          ebarimtId = undefined;
+        }
+      }
+      return tx.payment.update({
+        where: { id: paymentId },
+        data: {
+          status: "PAID",
+          paidAt: new Date(),
+          qpayPaymentId: qpayPaymentId ?? payment.qpayPaymentId,
+          ebarimtId,
+        },
+        include: { book: true },
+      });
+    }
+
     const use = payment.creditSpent;
+    if (!payment.bookId || !payment.book) throw new Error("Ном олдсонгүй");
     if (use > 0) {
       const buyer = await tx.user.findUnique({ where: { id: payment.buyerId } });
       if (!buyer || buyer.credit < use) throw new Error("Кредит хүрэлцэхгүй байна");

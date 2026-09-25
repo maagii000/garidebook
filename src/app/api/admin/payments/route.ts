@@ -20,7 +20,9 @@ export async function GET() {
   return NextResponse.json({
     payments: rows.map((p) => ({
       id: p.id,
-      bookTitle: p.book.title,
+      bookTitle: p.book?.title ?? p.purpose,
+      purpose: p.purpose,
+      refId: p.refId,
       buyer: umap.get(p.buyerId)?.name ?? umap.get(p.buyerId)?.email ?? "—",
       amount: p.amount,
       creditSpent: p.creditSpent,

@@ -93,6 +93,13 @@ enum PaymentMethod {
   TRANSFER
 }
 
+enum PaymentPurpose {
+  BOOK
+  UPLOAD_FEE
+  AD_FEE
+  MEMBERSHIP
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -215,8 +222,10 @@ model Payment {
   orderId       String?
   order         Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
   buyerId       String
-  bookId        String
-  book          Book          @relation(fields: [bookId], references: [id])
+  bookId        String?
+  book          Book?         @relation(fields: [bookId], references: [id])
+  purpose       PaymentPurpose @default(BOOK)
+  refId         String?
   amount        Int
   creditSpent   Int           @default(0)
   status        PaymentStatus @default(PENDING)
