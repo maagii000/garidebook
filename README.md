@@ -35,6 +35,8 @@ npm run dev
 
 `.env*` gitignore-д — GitHub-д хэзээ ч орохгүй. Vercel → Project → Settings → Environment Variables-д хийнэ.
 
+> **Canonical domain: `https://blackup.ink`** — `middleware.ts` бусад бүх хостыг (garidebook.world орно) 308-аар тийш нь шилжүүлнэ. `NEXTAUTH_URL=https://blackup.ink` байх ёстой; Google OAuth redirect URI ч мөн энэ домэйн дээр.
+
 ## ☁️ Vercel deploy
 
 1. vercel.com → Add New → Project → `maagii000/garidebook` Import
