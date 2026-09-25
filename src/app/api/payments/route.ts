@@ -7,7 +7,7 @@ import { bankInfo } from "@/lib/bank";
 import { MAX_CREDIT_USE_PER_ORDER } from "@/lib/types";
 
 function originOf(req: NextRequest) {
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "garidebook.vercel.app";
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "blackup.ink";
   const proto = req.headers.get("x-forwarded-proto") ?? "https";
   return `${proto}://${host}`;
 }
