@@ -10,6 +10,8 @@ const NAV = [
   { href: "/catalog", label: "Каталоги" },
   { href: "/ads", label: "Зар" },
   { href: "/hub", label: "Мэдлэг" },
+  { href: "/chat", label: "Чат" },
+  { href: "/match", label: "Хамтрагч" },
   { href: "/membership", label: "Гишүүнчлэл" },
   { href: "/books/new", label: "Ном нэмэх" },
   { href: "/my-books", label: "Миний номууд" },
@@ -78,9 +80,10 @@ export default function Header() {
               <div className="hidden sm:flex items-center gap-2 text-sm">
                 <Link
                   href="/profile"
-                  className="font-semibold text-slate-700 hover:underline max-w-28 truncate"
+                  title={session.user?.name ?? session.user?.email ?? "Профайл"}
+                  className="grid h-10 w-10 place-items-center rounded-full bg-black text-white font-bold shadow-md border-2 border-white hover:bg-gray-800"
                 >
-                  {session.user?.name ?? session.user?.email}
+                  {(session.user?.name ?? session.user?.email ?? "Г").slice(0, 1).toUpperCase()}
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
@@ -173,6 +176,8 @@ export default function Header() {
             <Link href="/catalog" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Каталоги</Link>
             <Link href="/ads" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Зар</Link>
             <Link href="/hub" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Мэдлэг</Link>
+            <Link href="/chat" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Чат</Link>
+            <Link href="/match" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хамтрагч</Link>
             <Link href="/membership" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Гишүүнчлэл</Link>
             <Link href="/books/new" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Ном нэмэх (+кредит)</Link>
             <Link href="/my-books" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Миний номууд</Link>

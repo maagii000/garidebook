@@ -28,5 +28,7 @@ export const config = {
     "/admin/:path*",
     "/ads/new",
     "/hub/new",
+    "/chat",
+    "/match",
   ],
 };

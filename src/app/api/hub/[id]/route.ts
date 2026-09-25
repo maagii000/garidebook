@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { requireUser, requireAdmin, unauthorized, forbidden } from "@/lib/api-auth";
+import { requireUser, requireAdmin, forbidden } from "@/lib/api-auth";
 import { materialAccess } from "../route";
 
 // GET /api/hub/[id] — дэлгэрэнгүй + хандах эрх

@@ -110,6 +110,10 @@ model User {
   phone         String?
   credit        Int       @default(120)
   role          Role      @default(USER)
+  nickname      String?
+  bio           String    @default("")
+  school        String    @default("")
+  interests     String    @default("")
   createdAt     DateTime  @default(now())
   accounts      Account[]
   sessions      Session[]
@@ -122,6 +126,10 @@ model User {
   materials     Material[]
   materialAccess MaterialAccess[]
   memberships   Membership[]
+  swipesSent    Swipe[]   @relation("SwipeFrom")
+  swipesGot     Swipe[]   @relation("SwipeTo")
+  matchesA      Match[]   @relation("MatchA")
+  matchesB      Match[]   @relation("MatchB")
 }
 
 model Book {
@@ -353,7 +361,6 @@ enum MembershipStatus {
   EXPIRED
   CANCELLED
 }
-
 model Membership {
   id        String           @id @default(cuid())
   userId    String
@@ -367,4 +374,48 @@ model Membership {
   createdAt DateTime         @default(now())
 
   @@index([userId, status])
+}
+
+model ChatRoom {
+  id        String        @id @default(cuid())
+  name      String
+  topic     String        @default("")
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId    String
+  userName  String   @default("—")
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([roomId, createdAt])
+}
+
+model Swipe {
+  id        String   @id @default(cuid())
+  fromId    String
+  from      User     @relation("SwipeFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  toId      String
+  to        User     @relation("SwipeTo", fields: [toId], references: [id], onDelete: Cascade)
+  dir       String
+  createdAt DateTime @default(now())
+
+  @@unique([fromId, toId])
+  @@index([toId])
+}
+
+model Match {
+  id        String   @id @default(cuid())
+  aId       String
+  a         User     @relation("MatchA", fields: [aId], references: [id], onDelete: Cascade)
+  bId       String
+  b         User     @relation("MatchB", fields: [bId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([aId, bId])
 }

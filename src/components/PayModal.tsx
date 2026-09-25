@@ -28,7 +28,6 @@ export default function PayModal({ title, amount, description, purpose, refId, o
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [bankApps, setBankApps] = useState<BankApp[]>([]);
   const [transfer, setTransfer] = useState<{ paymentId: string; bank: { bankName: string; account: string; receiver: string }; ref: string } | null>(null);
-  const [paymentId, setPaymentId] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
@@ -58,7 +57,6 @@ export default function PayModal({ title, amount, description, purpose, refId, o
       const d = await r.json();
       if (!r.ok) { setErr(d.error || "Төлбөр үүсгэхэд алдаа"); return; }
       if (d.paid) { onPaid(d.paymentId ?? ""); return; }
-      setPaymentId(d.paymentId);
       if (d.transfer) {
         setTransfer({ paymentId: d.paymentId, bank: d.bank, ref: d.ref });
         startPoll(d.paymentId);
@@ -80,69 +78,73 @@ export default function PayModal({ title, amount, description, purpose, refId, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/60 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-extrabold text-navy">{title}</h2>
-            <div className="text-2xl font-extrabold text-navy mt-1">{amount.toLocaleString()}₮</div>
-          </div>
-          <button onClick={onClose} className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-sm font-bold text-slate-500" aria-label="хаах">✕</button>
-        </div>
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-[2rem] bg-white p-8 shadow-2xl text-center relative" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors" aria-label="хаах">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
+        <h3 className="text-2xl font-bold mb-1 text-black">Төлбөр төлөх</h3>
+        <p className="text-slate-500 text-sm mb-1">{title}</p>
+        <p className="text-black text-lg font-extrabold mb-6">{amount.toLocaleString()}₮</p>
 
         {!qr && !transfer && (
           <>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-sm font-bold">
+            <div className="grid grid-cols-2 gap-2 text-sm font-bold text-left">
               <button onClick={() => setMethod("qpay")}
-                className={`rounded-xl border px-4 py-3 ${method === "qpay" ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
+                className={`rounded-xl border px-4 py-3 ${method === "qpay" ? "bg-black text-white border-black" : "bg-white border-gray-200"}`}>
                 QPay QR
               </button>
               <button onClick={() => setMethod("transfer")}
-                className={`rounded-xl border px-4 py-3 ${method === "transfer" ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
+                className={`rounded-xl border px-4 py-3 ${method === "transfer" ? "bg-black text-white border-black" : "bg-white border-gray-200"}`}>
                 Шилжүүлэг
               </button>
             </div>
-            {err && <div className="mt-3 rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600">{err}</div>}
+            {err && <div className="mt-3 rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600 text-left">{err}</div>}
             <button onClick={start} disabled={busy}
-              className="mt-4 w-full rounded-xl bg-accent px-5 py-3.5 font-extrabold text-white hover:bg-accent-dark disabled:opacity-50">
-              {busy ? "Үүсгэж байна..." : `${amount.toLocaleString()}₮ төлөх`}
+              className="mt-4 w-full rounded-xl bg-brand px-5 py-4 font-bold text-white shadow-md hover:bg-brand-dark disabled:opacity-50 transition-all">
+              {busy ? "Үүсгэж байна..." : "Төлбөр шалгах"}
             </button>
           </>
         )}
 
         {qr && !transfer && (
-          <div className="mt-4 text-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qr} alt="QPay QR" className="mx-auto h-60 w-60 rounded-2xl border bg-white p-3" />
+          <>
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-4 inline-block">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={qr} alt="QPay QR" className="h-48 w-48 rounded-xl bg-white" />
+            </div>
             {shortUrl && (
-              <a href={shortUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-bold text-accent-dark hover:underline">
+              <a href={shortUrl} target="_blank" rel="noreferrer" className="block text-sm font-bold text-brand hover:underline">
                 Утаснаасаа шууд төлөх →
               </a>
             )}
             {bankApps.length > 0 && (
-              <div className="mt-3 rounded-2xl border bg-white p-3 text-left">
-                <div className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Банк апп сонгох</div>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  {bankApps.map((b) => (
-                    <a key={b.name} href={b.link} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-2 rounded-xl border border-slate-200 px-2.5 py-2 hover:border-navy transition">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={b.logo} alt="" className="h-7 w-7 rounded-lg object-contain bg-white" />
-                      <span className="truncate text-xs font-extrabold text-slate-800">{b.name}</span>
+              <>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-5 mb-3">Банк сонгох</p>
+                <div className="grid grid-cols-4 gap-2 mb-2">
+                  {bankApps.slice(0, 8).map((b, i) => (
+                    <a key={b.name} href={b.link} target="_blank" rel="noreferrer" title={b.description || b.name}
+                      className="h-14 rounded-xl flex items-center justify-center text-white hover:opacity-90 transition-opacity shadow-sm overflow-hidden"
+                      style={{ backgroundColor: ["#14B8A6", "#3B82F6", "#F97316", "#8B5CF6", "#111111", "#0EA5E9", "#10B981", "#6366F1"][i % 8] }}>
+                      {b.logo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={b.logo} alt={b.name} className="h-8 w-8 rounded-lg object-contain bg-white/90 p-0.5" />
+                      ) : (
+                        <span className="text-[10px] font-bold px-1 text-center leading-tight">{b.name}</span>
+                      )}
                     </a>
                   ))}
                 </div>
-              </div>
+              </>
             )}
             <div className="mt-3 flex items-center justify-center gap-2 text-sm text-slate-500">
               <span className="h-3 w-3 animate-ping rounded-full bg-emerald-500" /> Төлбөр хүлээж байна...
             </div>
-            <div className="mt-1 text-[11px] text-slate-400">Төлбөрийн ID: {paymentId?.slice(0, 8).toUpperCase()}</div>
-          </div>
+          </>
         )}
 
         {transfer && (
-          <div className="mt-4 space-y-2.5 text-sm">
+          <div className="mt-2 space-y-2.5 text-sm text-left">
             {([
               ["Банк", transfer.bank.bankName],
               ["Данс", transfer.bank.account],
@@ -150,10 +152,10 @@ export default function PayModal({ title, amount, description, purpose, refId, o
               ["Гүйлгээний утга", transfer.ref],
               ["Дүн", `${amount.toLocaleString()}₮`],
             ] as [string, string][]).map(([l, v]) => (
-              <div key={l} className="flex items-center justify-between gap-2 rounded-xl bg-paper border px-3.5 py-2.5">
+              <div key={l} className="flex items-center justify-between gap-2 rounded-xl bg-gray-50 border border-gray-100 px-3.5 py-2.5">
                 <span className="text-slate-500">{l}</span>
-                <span className="font-extrabold text-right break-all">{v}</span>
-                <button onClick={() => copy(v)} className="shrink-0 rounded-lg bg-navy-light px-2 py-1 text-xs font-bold text-navy">Хуулах</button>
+                <span className="font-extrabold text-right break-all text-black">{v}</span>
+                <button onClick={() => copy(v)} className="shrink-0 rounded-lg bg-blue-50 px-2 py-1 text-xs font-bold text-brand">Хуулах</button>
               </div>
             ))}
             <p className="text-xs text-slate-500 leading-5">Шилжүүлсний дараа админ баталгаажуулмагц үргэлжилнэ. Гүйлгээний утгаа заавал бичнэ үү.</p>

@@ -96,6 +96,20 @@ input[type="range"].credit-range {
 .animate-blob {
   animation: blob 10s infinite;
 }
+@keyframes swipeRight {
+  0% { transform: translateX(0) rotate(0); }
+  100% { transform: translateX(200%) rotate(20deg); opacity: 0; }
+}
+@keyframes swipeLeft {
+  0% { transform: translateX(0) rotate(0); }
+  100% { transform: translateX(-200%) rotate(-20deg); opacity: 0; }
+}
+.animate-swipe-right {
+  animation: swipeRight 0.45s forwards;
+}
+.animate-swipe-left {
+  animation: swipeLeft 0.45s forwards;
+}
 
 /* ---- Хөнгөн motion систем (сан 0KB) ----
    1) view-timeline дэмждэг browser: CSS-ээр автоматаар (JS 0)

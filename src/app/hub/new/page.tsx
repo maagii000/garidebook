@@ -115,6 +115,18 @@ export default function NewMaterialPage() {
           </label>
         </div>
 
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
+          <h4 className="font-bold text-sm mb-3 text-black">Орлогын хуваарилалт (70/30)</h4>
+          <div className="flex justify-between text-sm mb-2">
+            <span className="text-gray-600">Системийн байршуулах хураамж:</span>
+            <span className="font-bold text-black">₮{UPLOAD_FEE.toLocaleString()}</span>
+          </div>
+          <div className="w-full h-px bg-blue-200/50 my-3" />
+          <p className="text-xs text-gray-600 leading-relaxed">
+            Таны материалыг өөр оюутан худалдаж авах бүрт та <b>70%</b>-ийг шууд хүлээн авна. Систем 30%-ийг суутгана.
+          </p>
+        </div>
+
         <button
           onClick={() => { if (readyToPay() && !busy) setShowPay(true); }}
           disabled={busy}

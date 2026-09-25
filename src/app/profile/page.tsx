@@ -2,11 +2,43 @@
 
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { credit, txs, orders, notify } = useStore();
+  const [nickname, setNickname] = useState("");
+  const [bio, setBio] = useState("");
+  const [school, setSchool] = useState("");
+  const [interests, setInterests] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    fetch("/api/users/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d?.me) return;
+        setNickname(d.me.nickname ?? "");
+        setBio(d.me.bio ?? "");
+        setSchool(d.me.school ?? "");
+        setInterests(d.me.interests ?? "");
+      })
+      .catch(() => {});
+  }, [status]);
+
+  async function saveProfile() {
+    setSaving(true);
+    const r = await fetch("/api/users/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nickname, bio, school, interests }),
+    });
+    setSaving(false);
+    if (!r.ok) { notify("Хадгалах үед алдаа", "err"); return; }
+    notify("Танилцуулга хадгалагдлаа");
+  }
 
   if (status === "loading") {
     return <div className="mx-auto max-w-md px-4 py-16 text-center text-slate-500">Ачааллаж байна...</div>;
@@ -49,6 +81,40 @@ export default function ProfilePage() {
           <div className="text-3xl font-extrabold text-accent">{credit}</div>
           <div className="text-xs text-white/60">≈ {(credit * 10).toLocaleString()}₮ хөнгөлөлт</div>
         </div>
+      </div>
+
+      <div className="mt-6 rounded-[2rem] border border-gray-100 bg-white p-5 md:p-6 shadow-apple">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-extrabold text-black">Миний танилцуулга</h2>
+          <Link href="/match" className="text-xs font-bold text-brand hover:underline">Хамтрагч →</Link>
+        </div>
+        <p className="mt-1 text-xs text-slate-500">Хамтрагч олох хэсэгт ингэж харагдана. Утас, имэйл хэзээ ч харагдахгүй.</p>
+        <div className="mt-4 grid md:grid-cols-2 gap-3">
+          <label className="block">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Нэр (nickname)</span>
+            <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="ж: Сараа"
+              className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
+          </label>
+          <label className="block">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Сургууль</span>
+            <input value={school} onChange={(e) => setSchool(e.target.value)} placeholder="ж: СЭЗИС, 2-р курс"
+              className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
+          </label>
+          <label className="block md:col-span-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Танилцуулга</span>
+            <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={2} placeholder="Юу хайж байна?"
+              className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm outline-none focus:border-black" />
+          </label>
+          <label className="block md:col-span-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Сонирхол (таслалаар)</span>
+            <input value={interests} onChange={(e) => setInterests(e.target.value)} placeholder="ж: Хөгжүүлэгч, Дизайн, Математик"
+              className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
+          </label>
+        </div>
+        <button onClick={saveProfile} disabled={saving}
+          className="mt-4 rounded-full bg-black px-6 py-2.5 text-sm font-bold text-white hover:bg-gray-800 disabled:opacity-50">
+          {saving ? "Хадгалж байна..." : "Хадгалах"}
+        </button>
       </div>
 
       <div className="mt-6 grid md:grid-cols-2 gap-5">
