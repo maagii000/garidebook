@@ -12,15 +12,18 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
     take,
   });
-  return NextResponse.json({
-    reviews: rows.map((r) => ({
-      id: r.id,
-      rating: r.rating,
-      text: r.text,
-      bookId: r.book.id,
-      bookTitle: r.book.title,
-      userName: r.user.name ?? r.user.email?.split("@")[0] ?? "Уншигч",
-      createdAt: r.createdAt,
-    })),
-  });
+  return NextResponse.json(
+    {
+      reviews: rows.map((r) => ({
+        id: r.id,
+        rating: r.rating,
+        text: r.text,
+        bookId: r.book.id,
+        bookTitle: r.book.title,
+        userName: r.user.name ?? r.user.email?.split("@")[0] ?? "Уншигч",
+        createdAt: r.createdAt,
+      })),
+    },
+    { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+  );
 }

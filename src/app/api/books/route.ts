@@ -43,7 +43,6 @@ export async function GET(req: NextRequest) {
         : [{ createdAt: "desc" as const }];
 
   const books = await db.book.findMany({ where, include: bookInclude, orderBy, take: 200 });
-  // owned map (optional session)
   let ownedSet = new Set<string>();
   try {
     const { getServerSession } = await import("next-auth");
@@ -55,7 +54,10 @@ export async function GET(req: NextRequest) {
       ownedSet = new Set(os.map((o) => o.bookId));
     }
   } catch { /* public fallback */ }
-  return NextResponse.json({ books: books.map((b) => toBook(b, ownedSet.has(b.id))) });
+  return NextResponse.json(
+    { books: books.map((b) => toBook(b, ownedSet.has(b.id))) },
+    mine ? undefined : { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+  );
 }
 
 // POST /api/books — ном оруулах + авто-кредит

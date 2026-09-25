@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface Ad {
@@ -77,8 +78,7 @@ export default function AdsPage() {
                 className="group overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all">
                 <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-slate-100 m-2 mb-0">
                   {cover ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={cover} alt={a.title} loading="lazy" className="h-full w-full object-cover group-hover:scale-105 transition duration-300" />
+                    <Image src={cover} alt={a.title} fill sizes="(max-width: 768px) 45vw, 200px" loading="lazy" className="object-cover group-hover:scale-105 transition duration-300" />
                   ) : (
                     <div className="grid h-full w-full place-items-center bg-gradient-to-br from-blue-600 to-indigo-800 p-3 text-center">
                       <span className="text-white text-sm font-extrabold leading-snug clamp-2">{a.title}</span>

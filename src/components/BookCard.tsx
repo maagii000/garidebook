@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Book,
   CONDITION_LABEL,
@@ -37,12 +38,13 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
       {/* Босоо ковер 3:4 — хурц (тавиур мэдрэмж) */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-slate-100 m-2 mb-0">
         {cover ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={cover}
             alt={book.title}
+            fill
+            sizes="(max-width: 768px) 45vw, 180px"
             loading="lazy"
-            className="h-full w-full object-cover group-hover:scale-105 transition duration-300"
+            className="object-cover group-hover:scale-105 transition duration-300"
           />
         ) : (
           <CoverArt book={book} />

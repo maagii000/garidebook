@@ -22,7 +22,7 @@ interface StoreShape {
   loading: boolean;
   notify: (text: string, kind?: "ok" | "err") => void;
   toasts: ToastMsg[];
-  refreshAll: () => void;
+  refreshAll: (force?: boolean) => void;
   addBook: (b: {
     title: string; author: string; category: Book["category"]; condition: Book["condition"];
     description: string; images: string[];
@@ -35,6 +35,9 @@ interface StoreShape {
 }
 
 const Ctx = createContext<StoreShape | null>(null);
+
+// Module-level: books жагсаалтын сүүлд татсан цаг (tab全体で共有)
+let lastBooksFetch = 0;
 
 async function j<T>(url: string, init?: RequestInit): Promise<T> {
   const r = await fetch(url, init);
@@ -63,8 +66,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => setToasts((p) => p.filter((t) => t.id !== id)), 3500);
   }, []);
 
-  const refreshAll = useCallback(() => {
-    j<{ books: Book[] }>("/api/books").then((d) => setBooks(d.books)).catch(() => {});
+  const refreshAll = useCallback((force = false) => {
+    const now = Date.now();
+    // Номын жагсаалт 60с cache (edge cache-тэй хамт давхар хамгаалалт)
+    if (force || now - lastBooksFetch > 60_000) {
+      lastBooksFetch = now;
+      j<{ books: Book[] }>("/api/books").then((d) => setBooks(d.books)).catch(() => {});
+    }
     if (!authed) {
       setLoading(false);
       return;
@@ -108,7 +116,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify(input),
         });
         setCredit(d.credit);
-        refreshAll();
+        refreshAll(true);
         return { book: d.book, earned: d.earned };
       } catch (e) {
         return { error: e instanceof Error ? e.message : "Алдаа гарлаа" };
@@ -122,7 +130,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rating, text }),
         });
-        refreshAll();
+        refreshAll(true);
         return { ok: true };
       } catch (e) {
         return { error: e instanceof Error ? e.message : "Алдаа гарлаа" };
@@ -152,7 +160,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ bookId, creditToUse }),
         });
         setCredit(d.credit);
-        refreshAll();
+        refreshAll(true);
         return { order: d.order };
       } catch (e) {
         return { error: e instanceof Error ? e.message : "Алдаа гарлаа" };
@@ -166,7 +174,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: st }),
         });
-        refreshAll();
+        refreshAll(true);
         notify("Төлөв шинэчлэгдлээ ✓");
       } catch (e) {
         notify(e instanceof Error ? e.message : "Алдаа гарлаа", "err");

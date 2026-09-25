@@ -49,7 +49,10 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
     take: 200,
   });
-  return NextResponse.json({ ads: ads.map(toAd) });
+  return NextResponse.json(
+    { ads: ads.map(toAd) },
+    mine ? undefined : { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+  );
 }
 
 // POST /api/ads — 500₮ хураамж төлсний дараа зар нийтлэх

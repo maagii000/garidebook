@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useStore } from "@/lib/store";
@@ -88,8 +89,9 @@ export default function BookDetailPage() {
       <div className="mt-4 grid gap-6 md:grid-cols-2">
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
           {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover} alt={book.title} className="h-96 w-full object-cover" />
+            <div className="relative h-96 w-full">
+              <Image src={cover} alt={book.title} fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" priority />
+            </div>
           ) : (
             <div className="h-96">
               <CoverArt book={book} />
