@@ -179,15 +179,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider value={value}>
       {children}
-      {/* Toasts */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-[92%] max-w-md">
+      {/* Toasts — Apple prototype: хар баруун-доод */}
+      <div className="fixed bottom-6 right-6 z-[120] flex flex-col gap-2 w-[92%] max-w-sm">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`rounded-xl px-4 py-3 text-sm font-bold shadow-lg border ${
-              t.kind === "ok" ? "bg-emerald-600 text-white border-emerald-700" : "bg-red-600 text-white border-red-700"
+            className={`animate-scale-up flex items-center gap-3 rounded-2xl px-5 py-3 text-sm font-medium shadow-2xl ${
+              t.kind === "ok" ? "bg-black text-white" : "bg-red-600 text-white"
             }`}
           >
+            <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full ${t.kind === "ok" ? "bg-emerald-500" : "bg-white/30"} text-white text-xs font-bold`}>
+              {t.kind === "ok" ? "✓" : "!"}
+            </span>
             {t.text}
           </div>
         ))}

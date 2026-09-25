@@ -32,6 +32,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       fileName: m.fileName,
       fileSize: m.fileSize,
       price: m.price,
+      kind: m.kind ?? "",
+      downloads: m.downloads ?? 0,
       status: m.status,
       ownerName: m.owner?.name ?? "—",
       createdAt: m.createdAt,

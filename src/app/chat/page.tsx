@@ -134,16 +134,21 @@ export default function ChatPage() {
                 <button
                   key={r.id}
                   onClick={() => setRoomId(r.id)}
-                  className={`w-full text-left p-3 rounded-2xl cursor-pointer transition-all border ${
-                    r.id === roomId ? "bg-white border-gray-100 shadow-sm" : "border-transparent hover:bg-white hover:border-gray-100"
+                  className={`w-full text-left p-3 rounded-2xl cursor-pointer transition-colors flex items-center gap-3 ${
+                    r.id === roomId ? "bg-brand/10 border-l-4 border-brand" : "border border-transparent hover:bg-white hover:border-gray-100"
                   }`}>
-                  <div className="flex justify-between items-start mb-1 gap-2">
-                    <h4 className={`font-bold text-sm ${r.id === roomId ? "text-black" : "text-gray-700"}`}>{r.name}</h4>
-                    {r.last && <span className="text-[10px] text-gray-400 shrink-0">{fmtTime(r.last.createdAt)}</span>}
+                  <div className="w-10 h-10 rounded-full bg-brand/10 text-brand font-bold flex items-center justify-center text-xs shrink-0">
+                    {r.name.slice(0, 2).toUpperCase()}
                   </div>
-                  <p className="text-xs text-slate-500 truncate">
-                    {r.last ? `${r.last.userName}: ${r.last.text}` : r.topic || "Хоосон"}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                      <h4 className={`font-bold text-xs truncate ${r.id === roomId ? "text-black" : "text-gray-700"}`}>{r.name}</h4>
+                      {r.last && <span className="text-[10px] text-gray-400 shrink-0">{fmtTime(r.last.createdAt)}</span>}
+                    </div>
+                    <p className="text-[11px] text-slate-500 truncate">
+                      {r.last ? `${r.last.userName}: ${r.last.text}` : r.topic || "Хоосон"}
+                    </p>
+                  </div>
                 </button>
               ))}
               {filtered.length === 0 && (
@@ -156,33 +161,38 @@ export default function ChatPage() {
           {room ? (
             <div className={`${roomId ? "flex" : "hidden"} md:flex w-full md:w-2/3 flex-col bg-white`}>
               <div className="p-4 md:p-6 border-b border-gray-100 flex items-center justify-between bg-white/90">
-                <div>
-                  <h3 className="font-bold text-lg flex items-center gap-2 text-black">
-                    <button onClick={() => setRoomId(null)} className="md:hidden" aria-label="буцах">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5m7-7-7 7 7 7" /></svg>
-                    </button>
-                    {room.name}
-                  </h3>
-                  <p className="text-xs text-green-500 font-medium flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-green-500" /> {room.online} оюутан онлайн
-                  </p>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setRoomId(null)} className="md:hidden" aria-label="буцах">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5m7-7-7 7 7 7" /></svg>
+                  </button>
+                  <div className="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-xs shrink-0">
+                    {room.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-black">{room.name}</h3>
+                    <p className="text-xs text-green-500 font-medium flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-green-500" /> {room.online} оюутан онлайн
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <div className="flex-grow p-4 md:p-6 overflow-y-auto bg-[#FAFAFA] flex flex-col gap-4">
                 {msgs.map((m) => {
                   const mine = myId && m.userId === myId;
-                  return mine ? (
-                    <div key={m.id} className="flex flex-col items-end self-end max-w-[80%]">
-                      <span className="text-[11px] text-gray-500 mb-1 mr-1">Та</span>
-                      <div className="bg-black text-white p-3.5 rounded-2xl rounded-tr-none shadow-sm text-sm whitespace-pre-wrap break-words">
-                        {m.text}
+                  const t = new Date(m.createdAt);
+                  const time = `${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`;
+                  return (
+                    <div key={m.id} className="flex flex-col">
+                      <div className={`flex items-center gap-1.5 mb-1 ${mine ? "justify-end" : ""}`}>
+                        <span className="text-[10px] font-bold text-slate-500">{mine ? "Та" : m.userName}</span>
+                        <span className="text-[9px] text-slate-400/70">{time}</span>
                       </div>
-                    </div>
-                  ) : (
-                    <div key={m.id} className="flex flex-col items-start max-w-[80%]">
-                      <span className="text-[11px] text-gray-500 mb-1 ml-1">{m.userName}</span>
-                      <div className="bg-white border border-gray-100 p-3.5 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800 whitespace-pre-wrap break-words">
+                      <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-xs whitespace-pre-wrap break-words ${
+                        mine
+                          ? "self-end bg-brand text-white rounded-br-none shadow-md"
+                          : "self-start bg-[#F5F5F7] text-black rounded-bl-none border border-gray-200/60"
+                      }`}>
                         {m.text}
                       </div>
                     </div>

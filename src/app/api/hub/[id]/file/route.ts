@@ -20,5 +20,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const sb = supabaseAdmin();
   const { data, error } = await sb.storage.from("ebooks").createSignedUrl(m.filePath, 3600);
   if (error || !data) return NextResponse.json({ error: "Файл нээхэд алдаа" }, { status: 500 });
+  await db.material.update({ where: { id }, data: { downloads: { increment: 1 } } }).catch(() => {});
   return NextResponse.json({ url: data.signedUrl, fileName: m.fileName });
 }

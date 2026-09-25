@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useStore } from "@/lib/store";
+import WalletModal from "@/components/WalletModal";
 
 const NAV = [
   { href: "/catalog", label: "Каталоги" },
@@ -23,6 +24,7 @@ export default function Header() {
   const { data: session, status } = useSession();
   const { credit } = useStore();
   const [open, setOpen] = useState(false);
+  const [walletOpen, setWalletOpen] = useState(false);
   const [q, setQ] = useState("");
   const router = useRouter();
   const pathname = usePathname();
@@ -42,9 +44,11 @@ export default function Header() {
       {/* Дээд эгнээ: logo + search + кредит + profile */}
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center gap-3">
-          <Link href="/" className="flex items-center shrink-0 text-2xl" aria-label="Garidebook">
-            <span className="font-extrabold tracking-tight text-black">Garide</span>
-            <span className="ml-0.5 rounded bg-accent px-1.5 py-0.5 text-sm font-extrabold text-white">book</span>
+          <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Garidebook">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-white font-extrabold shadow-md">
+              G
+            </span>
+            <span className="font-bold text-lg tracking-tight text-black">Garidebook</span>
           </Link>
 
           <form
@@ -65,14 +69,14 @@ export default function Header() {
 
           <div className="ml-auto flex items-center gap-2">
             {authed && (
-              <Link
-                href="/profile"
-                title="Кредит данс"
-                className="flex items-center gap-1.5 rounded-full bg-white/80 border border-gray-200 px-3 py-1.5 text-sm font-semibold shadow-sm hover:border-slate-300 transition"
+              <button
+                onClick={() => setWalletOpen(true)}
+                title="Кредит хэтэвч"
+                className="hidden sm:flex items-center gap-1.5 rounded-full bg-white/80 border border-gray-200 px-3 py-1.5 text-sm font-semibold shadow-sm hover:border-brand transition"
               >
                 <span className="h-2 w-2 rounded-full bg-brand" />
                 {credit} кр
-              </Link>
+              </button>
             )}
             {status === "loading" ? (
               <span className="text-sm text-slate-400">...</span>
@@ -111,9 +115,9 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Доод эгнээ: main nav (Mbook маяг) */}
-      <nav className="hidden md:block border-t border-slate-100">
-        <div className="mx-auto max-w-7xl px-4 flex items-center gap-6 text-sm font-bold text-slate-600">
+      {/* Доод эгнээ: pill nav (Apple prototype) */}
+      <nav className="hidden md:block border-t border-black/5">
+        <div className="mx-auto max-w-7xl px-4 flex items-center gap-1 py-2 text-sm font-medium">
           {NAV.map((n) => {
             const active =
               pathname === n.href ||
@@ -122,8 +126,10 @@ export default function Header() {
               <Link
                 key={n.href}
                 href={n.href}
-                className={`relative py-3 hover:text-black transition ${
-                  active ? "text-black" : ""
+                className={`px-4 py-2 rounded-full transition-all whitespace-nowrap ${
+                  active
+                    ? "text-brand bg-brand/10"
+                    : "text-slate-500 hover:text-black hover:bg-black/5"
                 }`}
               >
                 {n.label}
@@ -132,23 +138,19 @@ export default function Header() {
                     +кредит
                   </span>
                 )}
-                {active && (
-                  <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-black" />
-                )}
               </Link>
             );
           })}
           {isAdmin && (
             <Link
               href="/admin"
-              className={`relative py-3 hover:text-black ${
-                pathname === "/admin" ? "text-black" : ""
+              className={`px-4 py-2 rounded-full transition-all whitespace-nowrap ${
+                pathname === "/admin"
+                  ? "text-brand bg-brand/10"
+                  : "text-slate-500 hover:text-black hover:bg-black/5"
               }`}
             >
               Админ
-              {pathname === "/admin" && (
-                <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-black" />
-              )}
             </Link>
           )}
         </div>
@@ -191,6 +193,7 @@ export default function Header() {
           </nav>
         </div>
       )}
+      {walletOpen && <WalletModal onClose={() => setWalletOpen(false)} />}
     </header>
   );
 }

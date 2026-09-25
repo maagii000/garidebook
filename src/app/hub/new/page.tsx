@@ -1,22 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import PayModal from "@/components/PayModal";
 import { UPLOAD_FEE } from "@/lib/payments";
+
+const KINDS = ["Лекц", "Курсын ажил", "Шалгалтын материал", "Видео хичээл"];
 
 export default function NewMaterialPage() {
   const router = useRouter();
   const { notify } = useStore();
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
+  const [subjects, setSubjects] = useState<string[]>([]);
+  const [kind, setKind] = useState(KINDS[0]);
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("0");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState("");
   const [showPay, setShowPay] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/hub?subjects=1")
+      .then((r) => r.json())
+      .then((d) => { if (Array.isArray(d.subjects)) setSubjects(d.subjects); })
+      .catch(() => {});
+  }, []);
 
   function readyToPay() {
     if (!title.trim()) { notify("Гарчиг шаардлагатай", "err"); return false; }
@@ -47,6 +58,7 @@ export default function NewMaterialPage() {
         body: JSON.stringify({
           title: title.trim(),
           subject: subject.trim(),
+          kind,
           description: description.trim(),
           filePath: u.path,
           fileName: file!.name,
@@ -95,13 +107,23 @@ export default function NewMaterialPage() {
               className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-accent" />
           </label>
           <label className="block">
-            <span className="text-sm font-bold">Хичээл</span>
-            <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="ж: Математик"
+            <span className="text-sm font-bold">Хичээл / хөтөлбөр</span>
+            <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="ж: Математик" list="hub-subjects"
               className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-accent" />
+            <datalist id="hub-subjects">
+              {subjects.map((s) => <option key={s} value={s} />)}
+            </datalist>
           </label>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
+          <label className="block">
+            <span className="text-sm font-bold">Материалын төрөл</span>
+            <select value={kind} onChange={(e) => setKind(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white">
+              {KINDS.map((k) => <option key={k} value={k}>{k}</option>)}
+            </select>
+          </label>
           <label className="block md:col-span-1">
             <span className="text-sm font-bold">Тайлбар</span>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3}

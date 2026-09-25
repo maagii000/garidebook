@@ -13,6 +13,7 @@ export async function GET() {
       bio: (me as { bio?: string }).bio ?? "",
       school: (me as { school?: string }).school ?? "",
       interests: (me as { interests?: string }).interests ?? "",
+      lookingFor: (me as { lookingFor?: string }).lookingFor ?? "study",
     },
   });
 }
@@ -21,7 +22,7 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
-  const { nickname, bio, school, interests } = await req.json();
+  const { nickname, bio, school, interests, lookingFor } = await req.json();
   const updated = await db.user.update({
     where: { id: me.id },
     data: {
@@ -29,6 +30,7 @@ export async function PATCH(req: NextRequest) {
       bio: String(bio || "").trim().slice(0, 300),
       school: String(school || "").trim().slice(0, 80),
       interests: String(interests || "").trim().slice(0, 120),
+      lookingFor: lookingFor === "business" ? "business" : "study",
     },
   });
   return NextResponse.json({ ok: true });

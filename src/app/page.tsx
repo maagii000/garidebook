@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import BookRail from "@/components/BookRail";
 import { Reveal } from "@/components/Reveal";
+import Hero from "@/components/home/Hero";
 import StudioShowcase from "@/components/home/StudioShowcase";
 import CreditService from "@/components/home/CreditService";
 import Testimonials from "@/components/home/Testimonials";
@@ -57,6 +58,9 @@ export default function Home() {
 
   return (
     <div className="pb-10">
+      {/* 0. Hero (Apple prototype) */}
+      <Hero bookCount={active.length} />
+
       {/* 1. Студи showcase */}
       {active.length === 0 ? (
         <div className="mx-auto max-w-7xl px-4">

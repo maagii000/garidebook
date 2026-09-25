@@ -35,16 +35,15 @@ function XIcon({ className = "" }: { className?: string }) {
 }
 
 const BASE_PERKS = [
-  { ok: true, text: "Мэдлэгийн сан (материал авах/зарах)" },
-  { ok: true, text: "Номын каталог + P2P солилцоо" },
-  { ok: true, text: "Кредит данс + хямдрал" },
-  { ok: false, text: "Нойр & Хувь хүний хөгжил" },
-  { ok: false, text: "Оюутны зар, маркетплейс" },
+  { ok: true, text: "Мэдлэгийн сан үзэх, татах" },
+  { ok: true, text: "Оюутны чат хэсэгт чөлөөт оролцоо" },
+  { ok: true, text: "Файл байршуулж орлого олох эрх" },
+  { ok: false, text: "VIP Business Partner match" },
 ];
 
 const PRO_PERKS = [
   { ok: true, text: "Base багцын бүх эрх" },
-  { ok: true, text: "Нойрны хэмнэл & Хувь хүний хөгжил" },
+  { ok: true, text: "Study & Business VIP Match" },
   { ok: true, text: "Оюутны зар оруулах, харах" },
   { ok: true, text: "Онцгой тэмдэг (Pro badge)" },
 ];
@@ -103,13 +102,16 @@ export default function MembershipPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-10 pb-20">
-      <Reveal className="text-center max-w-2xl mx-auto mb-12">
-        <span className="text-brand font-semibold tracking-wider uppercase text-xs mb-2 block">Garidebook</span>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-black">Өөрт тохирох багцаа сонгоно уу.</h1>
-        <p className="text-slate-500 text-lg">Сурагчдад зориулсан мэдлэг, солилцоо, хөгжлийн нэгдсэн систем.</p>
-        <div className="mt-6 inline-flex bg-[#F4F4F5] p-1 rounded-full text-sm font-medium">
+      <Reveal className="text-center max-w-2xl mx-auto space-y-3 mb-10">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand/10 text-brand text-xs font-semibold">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.7 9a.6.6 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .7-1c2.7-.8 5.2-2 7.3-3.5a1 1 0 0 1 1.2 0c2 1.5 4.5 2.7 7.1 3.5a1 1 0 0 1 .7 1Z" /><path d="m9 12 2 2 4-4" /></svg>
+          <span>Ил тод гишүүнчлэлийн төлөвлөгөө</span>
+        </div>
+        <h2 className="text-3xl sm:text-5xl font-extrabold text-black tracking-tight">Өөрт тохирох багцаа сонгоно уу</h2>
+        <p className="text-slate-500 text-sm sm:text-base">Сурагчдад зориулсан хамгийн хямд бөгөөд үр дүнтэй гишүүнчлэл</p>
+        <div className="inline-flex bg-[#F5F5F7] p-1 rounded-full text-sm font-medium">
           <span className="px-4 py-2 rounded-full bg-white shadow-sm text-black">
-            Одоогийн төлөв: <span className="font-bold text-brand">{plan ?? "Багцгүй"}</span>
+            Одоогийн төлөв: <span className="font-bold text-brand">{plan === "PRO" ? "Full Access" : plan ?? "Багцгүй"}</span>
             {endsAt && <span className="text-slate-400"> • {String(endsAt).slice(0, 10)} хүртэл</span>}
           </span>
         </div>
@@ -117,75 +119,91 @@ export default function MembershipPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         {/* Base */}
-        <Reveal delay={80} className="bg-white rounded-[2rem] p-8 shadow-apple border border-gray-100 flex flex-col relative overflow-hidden">
-          {firstTimer && (
-            <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-4 py-1 rounded-bl-xl">
-              Эхний сар 100% ҮНЭГҮЙ
+        <Reveal delay={80} className="glass-card rounded-3xl p-8 flex flex-col justify-between hover:border-brand transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 bg-brand/10 text-brand text-[10px] font-bold px-3 py-1 rounded-bl-xl">POPULAR</div>
+          <div className="space-y-6">
+            <div>
+              <span className="text-xs font-bold text-brand uppercase tracking-wider">Base Tier</span>
+              <h3 className="text-2xl font-extrabold text-black mt-1">Үндсэн гишүүнчлэл</h3>
+              <p className="text-xs text-slate-500 mt-1">Анхан болон дунд түвшний сурагчдад зориулав.</p>
             </div>
-          )}
-          <h3 className="text-2xl font-bold mb-2 text-black">Base</h3>
-          <p className="text-slate-500 text-sm mb-6">Солилцоо болон харилцаанд шаардлагатай суурь эрх.</p>
-          <div className="mb-8">
-            <span className="text-4xl font-bold text-black">₮{price("BASE")}</span>
-            <span className="text-slate-500"> / сар</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-extrabold text-black">₮{price("BASE")}</span>
+              <span className="text-xs text-slate-500">/ сар</span>
+            </div>
+            {firstTimer && (
+              <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-700 text-xs font-medium">
+                Эхний сар үнэгүй турших боломжтой!
+              </div>
+            )}
+            <ul className="space-y-3 text-sm text-black">
+              {BASE_PERKS.map((f) => (
+                <li key={f.text} className={`flex items-center gap-3 ${f.ok ? "text-black" : "text-gray-400"}`}>
+                  {f.ok ? <CheckCircleIcon className="text-brand shrink-0" /> : <XIcon className="shrink-0" />}
+                  <span className={f.ok ? "" : "line-through"}>{f.text}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-4 mb-8 flex-grow">
-            {BASE_PERKS.map((f) => (
-              <li key={f.text} className={`flex items-center gap-3 ${f.ok ? "text-black" : "text-gray-400"}`}>
-                {f.ok ? <CheckCircleIcon className="text-green-500 shrink-0" /> : <XIcon className="shrink-0" />}
-                {f.text}
-              </li>
-            ))}
-          </ul>
+          <div className="pt-8">
           {plan === "BASE" ? (
-            <div className="w-full bg-gray-100 text-gray-400 py-4 rounded-full font-bold text-center">Идэвхтэй байна</div>
+            <div className="w-full py-3.5 rounded-2xl bg-gray-100 text-gray-400 font-semibold text-center">Идэвхтэй байна</div>
           ) : firstTimer ? (
             <button onClick={() => claimTrial("BASE")} disabled={busy}
-              className="w-full bg-black text-white py-4 rounded-full font-bold hover:bg-gray-800 transition-colors disabled:opacity-50">
-              {busy ? "Идэвхжүүлж байна..." : "Үнэгүй эхлэх"}
+              className="w-full py-3.5 rounded-2xl bg-white border border-gray-200 text-black font-semibold hover:border-brand transition-all shadow-sm disabled:opacity-50">
+              {busy ? "Идэвхжүүлж байна..." : "Эхний сар үнэгүй турших"}
             </button>
           ) : (
             <button
               onClick={() => { if (!session) { router.push("/login"); return; } setPayFor("BASE"); }}
-              className="w-full bg-black text-white py-4 rounded-full font-bold hover:bg-gray-800 transition-colors">
+              className="w-full py-3.5 rounded-2xl bg-white border border-gray-200 text-black font-semibold hover:border-brand transition-all shadow-sm">
               Base эрх авах
             </button>
           )}
+          </div>
         </Reveal>
 
-        {/* Pro */}
-        <Reveal delay={160} className="bg-black text-white rounded-[2rem] p-8 shadow-apple-hover border border-gray-800 flex flex-col relative">
-          <div className="absolute top-0 right-0 bg-gradient-to-r from-brand to-blue-400 text-white text-xs font-bold px-4 py-1 rounded-bl-xl shadow-lg">
-            Хамгийн эрэлттэй
+        {/* Full Access */}
+        <Reveal delay={160} className="glass-card rounded-3xl p-8 flex flex-col justify-between border-2 border-brand shadow-xl relative overflow-hidden bg-gradient-to-b from-white to-brand/5">
+          <div className="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">FULL ACCESS</div>
+          <div className="space-y-6">
+            <div>
+              <span className="text-xs font-bold text-brand uppercase tracking-wider">Full Access Tier</span>
+              <h3 className="text-2xl font-extrabold text-black mt-1">Бүтэн эрхтэй гишүүн</h3>
+              <p className="text-xs text-slate-500 mt-1">Бүх боломж, VIP түншлэл, хязгааргүй материал.</p>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-extrabold text-black">₮{price("PRO")}</span>
+              <span className="text-xs text-slate-500">/ сар</span>
+            </div>
+            <div className="p-3 rounded-2xl bg-brand/10 text-brand text-xs font-medium">
+              Бүх үйлчилгээ хязгааргүй ашиглах
+            </div>
+            <ul className="space-y-3 text-sm text-black">
+              {PRO_PERKS.map((f) => (
+                <li key={f.text} className="flex items-center gap-3">
+                  <CheckCircleIcon className="text-brand shrink-0" />
+                  {f.text}
+                </li>
+              ))}
+            </ul>
           </div>
-          <h3 className="text-2xl font-bold mb-2">Pro</h3>
-          <p className="text-gray-400 text-sm mb-6">Өөрийгөө хөгжүүлж, боломжуудыг бүрэн ашиглах.</p>
-          <div className="mb-8">
-            <span className="text-4xl font-bold">₮{price("PRO")}</span>
-            <span className="text-gray-400"> / сар</span>
-          </div>
-          <ul className="space-y-4 mb-8 flex-grow">
-            {PRO_PERKS.map((f) => (
-              <li key={f.text} className="flex items-center gap-3">
-                <CheckCircleIcon className="text-brand shrink-0" />
-                {f.text}
-              </li>
-            ))}
-          </ul>
+          <div className="pt-8">
           {plan === "PRO" ? (
-            <div className="w-full bg-gray-800 text-gray-400 py-4 rounded-full font-bold text-center">Идэвхтэй байна</div>
+            <div className="w-full py-3.5 rounded-2xl bg-gray-100 text-gray-400 font-semibold text-center">Идэвхтэй байна</div>
           ) : firstTimer ? (
             <button onClick={() => claimTrial("PRO")} disabled={busy}
-              className="w-full bg-brand text-white py-4 rounded-full font-bold hover:bg-brand-dark transition-colors shadow-lg disabled:opacity-50">
-              {busy ? "Идэвхжүүлж байна..." : "Үнэгүй эхлэх"}
+              className="w-full py-3.5 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-dark shadow-md transition-all disabled:opacity-50">
+              {busy ? "Идэвхжүүлж байна..." : "Эхний сар үнэгүй турших"}
             </button>
           ) : (
             <button
               onClick={() => { if (!session) { router.push("/login"); return; } setPayFor("PRO"); }}
-              className="w-full bg-brand text-white py-4 rounded-full font-bold hover:bg-brand-dark transition-colors shadow-lg">
-              Pro эрх авах
+              className="w-full py-3.5 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-dark shadow-md transition-all">
+              Full Access авах
             </button>
           )}
+          </div>
         </Reveal>
       </div>
 

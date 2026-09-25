@@ -13,14 +13,15 @@ function pub(u: { id: string; name: string | null; nickname: string | null; scho
   };
 }
 
-// GET /api/match/feed — swipe хийгээгүй хэрэглэгчид (max 20)
-export async function GET() {
+// GET /api/match/feed?mode=study|business — swipe хийгээгүй хэрэглэгчид (max 20)
+export async function GET(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
+  const mode = req.nextUrl.searchParams.get("mode") === "business" ? "business" : "study";
   const swiped = await db.swipe.findMany({ where: { fromId: me.id }, select: { toId: true } });
   const exclude = new Set([me.id, ...swiped.map((s) => s.toId)]);
   const users = await db.user.findMany({
-    where: { id: { notIn: [...exclude] } },
+    where: { id: { notIn: [...exclude] }, lookingFor: mode },
     select: { id: true, name: true, nickname: true, school: true, interests: true, bio: true, image: true },
     orderBy: { createdAt: "desc" },
     take: 20,

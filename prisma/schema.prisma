@@ -114,6 +114,7 @@ model User {
   bio           String    @default("")
   school        String    @default("")
   interests     String    @default("")
+  lookingFor    String    @default("study")
   createdAt     DateTime  @default(now())
   accounts      Account[]
   sessions      Session[]
@@ -329,6 +330,8 @@ model Material {
   fileName    String?
   fileSize    Int?
   price       Int            @default(0)
+  kind        String         @default("")
+  downloads   Int            @default(0)
   status      MaterialStatus @default(pending)
   feePaid     Boolean        @default(false)
   paymentId   String?

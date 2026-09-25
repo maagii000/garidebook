@@ -15,6 +15,8 @@ function toMaterial(m: any, access = false) {
     fileName: m.fileName,
     fileSize: m.fileSize,
     price: m.price,
+    kind: m.kind ?? "",
+    downloads: m.downloads ?? 0,
     status: m.status,
     ownerName: m.owner?.name ?? "—",
     createdAt: m.createdAt,
@@ -45,11 +47,24 @@ export async function materialAccess(userId: string | null, isAdmin: boolean, m:
   return false;
 }
 
-// GET /api/hub?mine=1&q=
+// GET /api/hub?mine=1&q=&subject=&kind=  (+ ?subjects=1 → distinct subjects)
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
+  if (sp.get("subjects") === "1") {
+    const rows = await db.material.findMany({
+      where: { status: "active" },
+      select: { subject: true },
+      distinct: ["subject"],
+      take: 50,
+    });
+    return NextResponse.json({
+      subjects: rows.map((r) => r.subject).filter((s) => s && s.trim()),
+    });
+  }
   const mine = sp.get("mine") === "1";
   const q = sp.get("q")?.trim();
+  const subject = sp.get("subject")?.trim();
+  const kind = sp.get("kind")?.trim();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};
@@ -60,6 +75,8 @@ export async function GET(req: NextRequest) {
   } else {
     where.status = "active";
   }
+  if (subject) where.subject = subject;
+  if (kind) where.kind = kind;
   if (q) {
     where.OR = [
       { title: { contains: q, mode: "insensitive" } },
@@ -81,7 +98,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
-  const { title, subject, description, filePath, fileName, fileSize, price, paymentId } = await req.json();
+  const { title, subject, description, filePath, fileName, fileSize, price, kind, paymentId } = await req.json();
 
   if (!title?.trim()) {
     return NextResponse.json({ error: "Гарчиг шаардлагатай" }, { status: 400 });
@@ -107,6 +124,7 @@ export async function POST(req: NextRequest) {
       fileName: fileName || "file",
       fileSize: Math.floor(Number(fileSize) || 0),
       price: Math.max(0, Math.floor(Number(price) || 0)),
+      kind: String(kind || "").slice(0, 40),
       status: "pending",
       feePaid: true,
       paymentId: pay.id,

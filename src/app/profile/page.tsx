@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [school, setSchool] = useState("");
   const [interests, setInterests] = useState("");
+  const [lookingFor, setLookingFor] = useState<"study" | "business">("study");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function ProfilePage() {
         setBio(d.me.bio ?? "");
         setSchool(d.me.school ?? "");
         setInterests(d.me.interests ?? "");
+        setLookingFor(d.me.lookingFor === "business" ? "business" : "study");
       })
       .catch(() => {});
   }, [status]);
@@ -33,7 +35,7 @@ export default function ProfilePage() {
     const r = await fetch("/api/users/me", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nickname, bio, school, interests }),
+      body: JSON.stringify({ nickname, bio, school, interests, lookingFor }),
     });
     setSaving(false);
     if (!r.ok) { notify("Хадгалах үед алдаа", "err"); return; }
@@ -110,6 +112,19 @@ export default function ProfilePage() {
             <input value={interests} onChange={(e) => setInterests(e.target.value)} placeholder="ж: Хөгжүүлэгч, Дизайн, Математик"
               className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
           </label>
+          <div className="md:col-span-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Хайж буй хамтрагч</span>
+            <div className="mt-1.5 flex gap-2">
+              {(["study", "business"] as const).map((m) => (
+                <button key={m} onClick={() => setLookingFor(m)}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+                    lookingFor === m ? "bg-brand text-white shadow-sm" : "bg-white text-black border border-gray-200"
+                  }`}>
+                  {m === "study" ? "Study Partner" : "Business Partner"}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
         <button onClick={saveProfile} disabled={saving}
           className="mt-4 rounded-full bg-black px-6 py-2.5 text-sm font-bold text-white hover:bg-gray-800 disabled:opacity-50">

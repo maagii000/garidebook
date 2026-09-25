@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-navy: #111111;
-  --color-navy-dark: #000000;
-  --color-navy-light: #eff6ff;
-  --color-paper: #fafafa;
+  --color-navy: #0071e3;
+  --color-navy-dark: #0077ed;
+  --color-navy-light: #e8f1fd;
+  --color-paper: #f5f5f7;
   --color-accent: #f97316;
   --color-accent-dark: #ea6a0a;
   --color-accent-light: #fff3e8;
   --color-sage: #10b981;
   --color-sage-light: #e6f9f1;
-  --color-brand: #2563eb;
-  --color-brand-dark: #1d4ed8;
+  --color-brand: #0071e3;
+  --color-brand-dark: #0077ed;
   --shadow-apple: 0 8px 30px rgba(0, 0, 0, 0.04);
   --shadow-apple-hover: 0 12px 40px rgba(0, 0, 0, 0.08);
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
@@ -19,8 +19,8 @@
 }
 
 :root {
-  --background: #fafafa;
-  --foreground: #000000;
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
 }
 
 html {
@@ -96,6 +96,46 @@ input[type="range"].credit-range {
 .animate-blob {
   animation: blob 10s infinite;
 }
+
+/* Apple prototype: glass card + fade/scale entrances + thin scrollbar */
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(210, 210, 215, 0.6);
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-fade-in {
+  animation: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes scale-up {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-up {
+  animation: scale-up 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+::selection {
+  background: #0071e3;
+  color: #fff;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f5f5f7;
+}
+::-webkit-scrollbar-thumb {
+  background: #d2d2d7;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #86868b;
+}
 @keyframes swipeRight {
   0% { transform: translateX(0) rotate(0); }
   100% { transform: translateX(200%) rotate(20deg); opacity: 0; }
@@ -109,6 +149,20 @@ input[type="range"].credit-range {
 }
 .animate-swipe-left {
   animation: swipeLeft 0.45s forwards;
+}
+@keyframes orbit {
+  0% { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+}
+@keyframes orbitReverse {
+  0% { transform: rotate(360deg) translateX(180px) rotate(-360deg); }
+  100% { transform: rotate(0deg) translateX(180px) rotate(0deg); }
+}
+.animate-orbit {
+  animation: orbit 20s linear infinite;
+}
+.animate-orbit-reverse {
+  animation: orbitReverse 25s linear infinite;
 }
 
 /* ---- Хөнгөн motion систем (сан 0KB) ----
