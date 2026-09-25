@@ -35,7 +35,7 @@ export default function AdsPage() {
     <div className="mx-auto max-w-7xl px-4 py-8">
       <div className="flex flex-wrap items-center gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Зарын хэсэг</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Хар зах</h1>
           <p className="text-sm text-slate-500 mt-1">
             Сурах бичиг, тэмдэглэл — сурагчдаас сурагчдад • {list.length} зар
           </p>

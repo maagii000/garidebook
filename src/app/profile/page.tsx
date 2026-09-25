@@ -158,7 +158,7 @@ export default function ProfilePage() {
         <div className="rounded-3xl border bg-white p-5">
           <h2 className="font-extrabold text-navy">Миний захиалгууд ({orders.length})</h2>
           <div className="mt-3 space-y-2 max-h-80 overflow-auto">
-            {orders.length === 0 && <div className="text-sm text-slate-500">Захиалга байхгүй. Каталогиос сонгоорой.</div>}
+            {orders.length === 0 && <div className="text-sm text-slate-500">Захиалга байхгүй. Хувь хүний хөгжлөөс сонгоорой.</div>}
             {orders.map((o) => (
               <div key={o.id} className="rounded-xl bg-paper border px-3.5 py-2.5 text-sm">
                 <div className="font-bold">{o.bookTitle}</div>

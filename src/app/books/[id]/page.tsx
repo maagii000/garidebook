@@ -53,7 +53,7 @@ export default function BookDetailPage() {
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
         <h1 className="text-xl font-extrabold">Ном олдсонгүй</h1>
         <Link href="/catalog" className="mt-4 inline-block text-accent-dark font-bold hover:underline">
-          ← Каталоги руу буцах
+          ← Хувь хүний хөгжил руу буцах
         </Link>
       </div>
     );
@@ -82,7 +82,7 @@ export default function BookDetailPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <Link href="/catalog" className="text-sm font-bold text-slate-500 hover:text-accent-dark">
-        ← Каталоги
+        ← Хувь хүний хөгжил
       </Link>
 
       <div className="mt-4 grid gap-6 md:grid-cols-2">

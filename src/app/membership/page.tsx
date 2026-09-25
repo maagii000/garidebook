@@ -35,7 +35,7 @@ function XIcon({ className = "" }: { className?: string }) {
 }
 
 const BASE_PERKS = [
-  { ok: true, text: "Мэдлэгийн сан үзэх, татах" },
+  { ok: true, text: "Материал зарах, татах" },
   { ok: true, text: "Оюутны чат хэсэгт чөлөөт оролцоо" },
   { ok: true, text: "Файл байршуулж орлого олох эрх" },
   { ok: false, text: "VIP Business Partner match" },

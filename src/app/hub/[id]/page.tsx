@@ -57,7 +57,7 @@ export default function HubDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link href="/hub" className="text-sm font-bold text-slate-500">← Мэдлэгийн сан</Link>
+      <Link href="/hub" className="text-sm font-bold text-slate-500">← Материал заръя</Link>
       <div className="mt-4 rounded-3xl border bg-white p-6 md:p-8">
         <span className="rounded-md bg-navy-light px-2.5 py-1 text-xs font-bold text-navy">
           {m.subject || "Ерөнхий"}

@@ -8,9 +8,9 @@ import { useStore } from "@/lib/store";
 import WalletModal from "@/components/WalletModal";
 
 const NAV = [
-  { href: "/catalog", label: "Каталоги" },
-  { href: "/ads", label: "Зар" },
-  { href: "/hub", label: "Мэдлэг" },
+  { href: "/catalog", label: "Хувь хүний хөгжил" },
+  { href: "/ads", label: "Хар зах" },
+  { href: "/hub", label: "Материал заръя" },
   { href: "/chat", label: "Чат" },
   { href: "/match", label: "Хамтрагч" },
   { href: "/membership", label: "Гишүүнчлэл" },
@@ -173,9 +173,9 @@ export default function Header() {
             />
           </form>
           <nav className="flex flex-col gap-1 text-sm font-bold text-slate-700">
-            <Link href="/catalog" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Каталоги</Link>
-            <Link href="/ads" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Зар</Link>
-            <Link href="/hub" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Мэдлэг</Link>
+            <Link href="/catalog" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хувь хүний хөгжил</Link>
+            <Link href="/ads" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хар зах</Link>
+            <Link href="/hub" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Материал заръя</Link>
             <Link href="/chat" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Чат</Link>
             <Link href="/match" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хамтрагч</Link>
             <Link href="/membership" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Гишүүнчлэл</Link>

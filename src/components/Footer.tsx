@@ -10,7 +10,7 @@ export default function Footer() {
         </div>
         <p className="text-xs text-slate-500">© 2026 Level Up Hub • Prototype / MVP • UFE төсөл</p>
         <div className="flex items-center gap-4 text-xs text-slate-500">
-          <Link href="/catalog" className="hover:text-black">Каталоги</Link>
+          <Link href="/catalog" className="hover:text-black">Хувь хүний хөгжил</Link>
           <Link href="/profile" className="hover:text-black">Тусламж</Link>
           <Link href="/membership" className="hover:text-black">Гишүүнчлэл</Link>
         </div>

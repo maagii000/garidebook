@@ -39,7 +39,7 @@ const FEATURES = [
   {
     href: "/hub",
     bg: "bg-brand/10 text-brand",
-    title: "Мэдлэгийн сан",
+    title: "Материал заръя",
     text: "Сорил, лекцээ шүүж олж, өөрийн файлаа байршуулан орлого олох.",
     cta: "Үзэх",
   },
@@ -76,7 +76,7 @@ export default function Hero({ bookCount }: { bookCount: number }) {
           </p>
           <div className="hero-enter flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2" style={{ "--hero-delay": "240ms" } as CSSProperties}>
             <Link href="/catalog" className="px-7 py-3.5 rounded-full bg-brand text-white font-medium hover:bg-brand-dark shadow-lg transition-all flex items-center gap-2">
-              <span>Каталоги үзэх</span>
+              <span>Хувь хүний хөгжил</span>
               <ArrowIcon />
             </Link>
             <Link href="/match" className="px-7 py-3.5 rounded-full bg-white border border-gray-200 text-black font-medium hover:border-brand transition-all shadow-sm">

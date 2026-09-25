@@ -63,7 +63,7 @@ function CatalogInner() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">Каталоги</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">Хувь хүний хөгжил</h1>
       <p className="text-sm text-slate-500 mt-1">
         Level Up Stock (албан ёсны) + сурагчдын P2P зарууд — нийт {list.length} ном
       </p>
