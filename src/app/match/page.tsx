@@ -92,7 +92,7 @@ export default function MatchPage() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-gray-200 pb-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-black tracking-tight">Study & Business Partner</h2>
+          <h2 className="text-3xl font-extrabold text-black tracking-tight">Хосоо ол</h2>
           <p className="text-sm text-slate-500 mt-1">Ижил зорилготой хамтрагчаа Tinder загвараар олоорой</p>
         </div>
         <div className="flex items-center gap-2">

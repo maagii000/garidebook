@@ -12,7 +12,7 @@ const NAV = [
   { href: "/ads", label: "Хар зах" },
   { href: "/hub", label: "Материал заръя" },
   { href: "/chat", label: "Чат" },
-  { href: "/match", label: "Хамтрагч" },
+  { href: "/match", label: "Хосоо ол" },
   { href: "/membership", label: "Гишүүнчлэл" },
   { href: "/books/new", label: "Ном нэмэх" },
   { href: "/my-books", label: "Миний номууд" },
@@ -177,7 +177,7 @@ export default function Header() {
             <Link href="/ads" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хар зах</Link>
             <Link href="/hub" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Материал заръя</Link>
             <Link href="/chat" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Чат</Link>
-            <Link href="/match" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хамтрагч</Link>
+            <Link href="/match" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хосоо ол</Link>
             <Link href="/membership" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Гишүүнчлэл</Link>
             <Link href="/books/new" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Ном нэмэх (+кредит)</Link>
             <Link href="/my-books" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Миний номууд</Link>

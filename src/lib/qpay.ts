@@ -7,16 +7,35 @@ const PASS = process.env.QPAY_PASSWORD || "";
 const INVOICE_CODE = process.env.QPAY_INVOICE_CODE || "TEST_INVOICE";
 const EB_INVOICE_CODE = process.env.QPAY_EB_INVOICE_CODE || "TEST_EB_INVOICE";
 
+// Sandbox удаашрал/тасалдалд UI гацахгүй: 20с timeout + тодорхой алдаа.
+const TIMEOUT_MS = 20_000;
+
+async function timedFetch(url: string, init: RequestInit): Promise<Response> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      throw new Error("QPay холбогдохгүй байна (20с хүлээлээ). Шилжүүлгээр оролдоно уу.");
+    }
+    throw new Error(`QPay сүлжээний алдаа: ${e instanceof Error ? e.message : "unknown"}`);
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 let tokenCache: { token: string; exp: number } | null = null;
 
 async function getToken(): Promise<string> {
   if (tokenCache && Date.now() < tokenCache.exp - 60_000) return tokenCache.token;
+  if (!USER || !PASS) throw new Error("QPay тохиргоо дутуу байна (QPAY_USERNAME/PASSWORD). Админд мэдэгдэнэ үү.");
   const basic = Buffer.from(`${USER}:${PASS}`).toString("base64");
-  const r = await fetch(`${HOST}/v2/auth/token`, {
+  const r = await timedFetch(`${HOST}/v2/auth/token`, {
     method: "POST",
     headers: { Authorization: `Basic ${basic}` },
   });
-  if (!r.ok) throw new Error(`QPay token failed (${r.status})`);
+  if (!r.ok) throw new Error(`QPay нэвтрэхэд алдаа (${r.status}). Шилжүүлгээр оролдоно уу.`);
   const d = await r.json();
   tokenCache = { token: d.access_token, exp: d.expires_in * 1000 };
   return d.access_token;
@@ -24,7 +43,7 @@ async function getToken(): Promise<string> {
 
 async function api<T>(path: string, init: RequestInit & { bearer?: string } = {}): Promise<T> {
   const token = init.bearer ?? (await getToken());
-  const r = await fetch(`${HOST}${path}`, {
+  const r = await timedFetch(`${HOST}${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...(init.headers || {}) },
   });

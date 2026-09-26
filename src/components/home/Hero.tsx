@@ -53,7 +53,7 @@ const FEATURES = [
   {
     href: "/match",
     bg: "bg-purple-500/10 text-purple-600",
-    title: "Хамтрагч олох",
+    title: "Хосоо ол",
     text: "Swipe загвараар хамт суралцах, төсөл хийх хамтрагчаа олох.",
     cta: "Хайх",
   },
@@ -80,7 +80,7 @@ export default function Hero({ bookCount }: { bookCount: number }) {
               <ArrowIcon />
             </Link>
             <Link href="/match" className="px-7 py-3.5 rounded-full bg-white border border-gray-200 text-black font-medium hover:border-brand transition-all shadow-sm">
-              <span>Хамтрагч хайх</span>
+              <span>Хосоо ол</span>
             </Link>
           </div>
           <div className="hero-enter grid grid-cols-3 gap-4 pt-8 border-t border-gray-200/60 max-w-lg mx-auto lg:mx-0" style={{ "--hero-delay": "320ms" } as CSSProperties}>

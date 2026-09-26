@@ -88,9 +88,9 @@ export default function ProfilePage() {
       <div className="mt-6 rounded-[2rem] border border-gray-100 bg-white p-5 md:p-6 shadow-apple">
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-extrabold text-black">Миний танилцуулга</h2>
-          <Link href="/match" className="text-xs font-bold text-brand hover:underline">Хамтрагч →</Link>
+          <Link href="/match" className="text-xs font-bold text-brand hover:underline">Хосоо ол →</Link>
         </div>
-        <p className="mt-1 text-xs text-slate-500">Хамтрагч олох хэсэгт ингэж харагдана. Утас, имэйл хэзээ ч харагдахгүй.</p>
+        <p className="mt-1 text-xs text-slate-500">Хосоо ол хэсэгт ингэж харагдана. Утас, имэйл хэзээ ч харагдахгүй.</p>
         <div className="mt-4 grid md:grid-cols-2 gap-3">
           <label className="block">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Нэр (nickname)</span>

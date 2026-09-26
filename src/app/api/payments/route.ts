@@ -48,12 +48,21 @@ export async function POST(req: NextRequest) {
     }
 
     const origin = originOf(req);
-    const inv = await createInvoice({
-      senderInvoiceNo: `LU-${payment.id.slice(0, 8).toUpperCase()}`,
-      description: (description || PURPOSE_LABEL[purpose as keyof typeof PURPOSE_LABEL]).slice(0, 60),
-      amount: fee,
-      callbackUrl: `${origin}/api/payments/qpay-callback?pid=${payment.id}`,
-    });
+    let inv;
+    try {
+      inv = await createInvoice({
+        senderInvoiceNo: `LU-${payment.id.slice(0, 8).toUpperCase()}`,
+        description: (description || PURPOSE_LABEL[purpose as keyof typeof PURPOSE_LABEL]).slice(0, 60),
+        amount: fee,
+        callbackUrl: `${origin}/api/payments/qpay-callback?pid=${payment.id}`,
+      });
+    } catch (e) {
+      await db.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } }).catch(() => {});
+      return NextResponse.json(
+        { error: e instanceof Error ? e.message : "QPay холбогдохгүй байна. Шилжүүлгээр оролдоно уу." },
+        { status: 503 }
+      );
+    }
     await db.payment.update({ where: { id: payment.id }, data: { qpayInvoiceId: inv.invoice_id } });
     return NextResponse.json({
       paymentId: payment.id,
@@ -107,12 +116,21 @@ export async function POST(req: NextRequest) {
   }
 
   const origin = originOf(req);
-  const inv = await createInvoice({
-    senderInvoiceNo: `LU-${payment.id.slice(0, 8).toUpperCase()}`,
+  let inv;
+  try {
+    inv = await createInvoice({
+      senderInvoiceNo: `LU-${payment.id.slice(0, 8).toUpperCase()}`,
       description: `LevelUp: ${book.title}`.slice(0, 60),
-    amount: cash,
-    callbackUrl: `${origin}/api/payments/qpay-callback?pid=${payment.id}`,
-  });
+      amount: cash,
+      callbackUrl: `${origin}/api/payments/qpay-callback?pid=${payment.id}`,
+    });
+  } catch (e) {
+    await db.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } }).catch(() => {});
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "QPay холбогдохгүй байна. Шилжүүлгээр оролдоно уу." },
+      { status: 503 }
+    );
+  }
 
   await db.payment.update({ where: { id: payment.id }, data: { qpayInvoiceId: inv.invoice_id } });
 
