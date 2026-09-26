@@ -53,7 +53,10 @@ export async function GET() {
       });
   }
 
-  const all = [...rooms.map((r) => ({ id: r.id, name: r.name, dm: false as const })), ...dms.map((d) => ({ id: d.id, name: d.name, dm: true as const }))];
+  const all = [
+    ...rooms.map((r) => ({ id: r.id, name: r.name, topic: r.topic, dm: false as const })),
+    ...dms.map((d) => ({ id: d.id, name: d.name, topic: "Хувийн чат", dm: true as const })),
+  ];
   const ids = all.map((r) => r.id);
   const [recent, online] = await Promise.all([
     ids.length
@@ -86,7 +89,7 @@ export async function GET() {
       rooms: all.map((r) => ({
         id: r.id,
         name: r.name,
-        topic: "",
+        topic: r.topic,
         dm: r.dm,
         online: onlineByRoom.get(r.id) ?? 0,
         last: lastByRoom.get(r.id) ?? null,
