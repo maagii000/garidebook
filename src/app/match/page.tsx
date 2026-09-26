@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 interface Person {
   id: string;
   name: string;
+  age: number | null;
   school: string;
   interests: string;
   bio: string;
@@ -154,7 +155,7 @@ export default function MatchPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-6 pointer-events-none">
                   <div>
                     <h3 className="text-white font-extrabold text-xl flex items-center gap-2">
-                      {top.name} <BadgeCheck className="text-brand" />
+                      {top.name}{top.age !== null ? `, ${top.age}` : ""} <BadgeCheck className="text-brand" />
                     </h3>
                     <p className="text-xs text-white/80">{top.school || "Сургууль бичигдээгүй"}</p>
                   </div>

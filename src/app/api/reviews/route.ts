@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { publicName } from "@/lib/profile";
 
 // GET /api/reviews?take=6 — сүүлийн ревьюнүүд (book + user нэртэй)
 export async function GET(req: NextRequest) {
@@ -7,7 +8,7 @@ export async function GET(req: NextRequest) {
   const rows = await db.review.findMany({
     include: {
       book: { select: { id: true, title: true } },
-      user: { select: { name: true, email: true } },
+      user: { select: { name: true, nickname: true } },
     },
     orderBy: { createdAt: "desc" },
     take,
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
         text: r.text,
         bookId: r.book.id,
         bookTitle: r.book.title,
-        userName: r.user.name ?? r.user.email?.split("@")[0] ?? "Уншигч",
+        userName: publicName(r.user),
         createdAt: r.createdAt,
       })),
     },

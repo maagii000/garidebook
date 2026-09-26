@@ -17,14 +17,20 @@ export default function ProfilePage() {
   const [school, setSchool] = useState("");
   const [interests, setInterests] = useState("");
   const [lookingFor, setLookingFor] = useState<"study" | "business">("study");
+  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [age, setAge] = useState<number | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [plan, setPlan] = useState<string | null>(null);
   const [endsAt, setEndsAt] = useState<string | null>(null);
   const [firstTimer, setFirstTimer] = useState(false);
   const [streak, setStreak] = useState(0);
 
-  useEffect(() => {
-    if (status !== "authenticated") return;
+  // Танилцуулга дахин ачаалах (Болих үед сэргээхэд)
+  function loadMe() {
     fetch("/api/users/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
@@ -34,8 +40,17 @@ export default function ProfilePage() {
         setSchool(d.me.school ?? "");
         setInterests(d.me.interests ?? "");
         setLookingFor(d.me.lookingFor === "business" ? "business" : "study");
+        setLastName(d.me.lastName ?? "");
+        setFirstName(d.me.firstName ?? "");
+        setBirthDate(d.me.birthDate ?? "");
+        setAge(d.me.age ?? null);
       })
       .catch(() => {});
+  }
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    loadMe();
     fetch("/api/membership")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
@@ -53,13 +68,21 @@ export default function ProfilePage() {
 
   async function saveProfile() {
     setSaving(true);
+    setFieldErrors({});
     const r = await fetch("/api/users/me", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nickname, bio, school, interests, lookingFor }),
+      body: JSON.stringify({ nickname, bio, school, interests, lookingFor, lastName, firstName, birthDate }),
     });
+    const d = await r.json().catch(() => ({}));
     setSaving(false);
-    if (!r.ok) { notify("Хадгалах үед алдаа", "err"); return; }
+    if (!r.ok) {
+      if (d.fields) setFieldErrors(d.fields);
+      notify(d.error || "Хадгалах үед алдаа", "err");
+      return;
+    }
+    setAge(d.age ?? age);
+    setEditing(false);
     notify("Танилцуулга хадгалагдлаа");
   }
 
@@ -78,7 +101,8 @@ export default function ProfilePage() {
   }
 
   const name = session.user.name ?? session.user.email ?? "Хэрэглэгч";
-  const displayName = nickname.trim() || name;
+  const fullName = `${lastName} ${firstName}`.trim();
+  const displayName = nickname.trim() || fullName || name;
   const isAdmin = (session.user as { role?: string }).role === "ADMIN";
 
   const tabs: { v: Tab; label: string; count?: number }[] = [
@@ -161,48 +185,124 @@ export default function ProfilePage() {
         <div className="mt-4 rounded-[2rem] border border-gray-100 bg-white p-5 md:p-6 shadow-apple">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-extrabold text-black">Миний танилцуулга</h2>
-            <Link href="/match" className="text-xs font-bold text-brand hover:underline">Хосоо ол →</Link>
-          </div>
-          <p className="mt-1 text-xs text-slate-500">Хосоо ол хэсэгт ингэж харагдана. Утас, имэйл хэзээ ч харагдахгүй.</p>
-          <div className="mt-4 grid md:grid-cols-2 gap-3">
-            <label className="block">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Нэр (nickname)</span>
-              <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="ж: Сараа"
-                className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
-            </label>
-            <label className="block">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Сургууль</span>
-              <input value={school} onChange={(e) => setSchool(e.target.value)} placeholder="ж: СЭЗИС, 2-р курс"
-                className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
-            </label>
-            <label className="block md:col-span-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Танилцуулга</span>
-              <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={2} placeholder="Юу хайж байна?"
-                className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm outline-none focus:border-black" />
-            </label>
-            <label className="block md:col-span-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Сонирхол (таслалаар)</span>
-              <input value={interests} onChange={(e) => setInterests(e.target.value)} placeholder="ж: Хөгжүүлэгч, Дизайн, Математик"
-                className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
-            </label>
-            <div className="md:col-span-2">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Хайж буй хамтрагч</span>
-              <div className="mt-1.5 flex gap-2">
-                {(["study", "business"] as const).map((m) => (
-                  <button key={m} onClick={() => setLookingFor(m)}
-                    className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                      lookingFor === m ? "bg-brand text-white shadow-sm" : "bg-white text-black border border-gray-200"
-                    }`}>
-                    {m === "study" ? "Study Partner" : "Business Partner"}
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center gap-2">
+              <Link href="/match" className="text-xs font-bold text-brand hover:underline">Хосоо ол →</Link>
+              {!editing && (
+                <button
+                  onClick={() => { setFieldErrors({}); setEditing(true); }}
+                  className="rounded-full bg-black px-4 py-2 text-xs font-bold text-white hover:bg-gray-800"
+                >
+                  Мэдээлэл засах
+                </button>
+              )}
             </div>
           </div>
-          <button onClick={saveProfile} disabled={saving}
-            className="mt-4 rounded-full bg-black px-6 py-2.5 text-sm font-bold text-white hover:bg-gray-800 disabled:opacity-50">
-            {saving ? "Хадгалж байна..." : "Хадгалах"}
-          </button>
+          <p className="mt-1 text-xs text-slate-500">
+            {editing
+              ? "Овог, нэр, төрсөн өдөр заавал бөглөнө. Имэйл бусдад харагдахгүй."
+              : "Хосоо ол хэсэгт ингэж харагдана. Утас, имэйл хэзээ ч харагдахгүй."}
+          </p>
+
+          {!editing ? (
+            <dl className="mt-4 grid md:grid-cols-2 gap-3 text-sm">
+              {[
+                ["Овог", lastName || "—"],
+                ["Нэр", firstName || "—"],
+                ["Нас", age !== null ? `${age}` : "—"],
+                ["Төрсөн өдөр", birthDate || "—"],
+                ["Нэр (nickname)", nickname || "—"],
+                ["Сургууль", school || "—"],
+              ].map(([l, v]) => (
+                <div key={l} className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3">
+                  <dt className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{l}</dt>
+                  <dd className="mt-0.5 font-bold text-black">{v}</dd>
+                </div>
+              ))}
+              <div className="md:col-span-2 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3">
+                <dt className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Танилцуулга</dt>
+                <dd className="mt-0.5 text-slate-700">{bio || "—"}</dd>
+              </div>
+              <div className="md:col-span-2 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3">
+                <dt className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Сонирхол</dt>
+                <dd className="mt-0.5 text-slate-700">{interests || "—"}</dd>
+              </div>
+              {(!lastName || !firstName || !birthDate) && (
+                <div className="md:col-span-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-700">
+                  Овог, нэр, төрсөн өдрөө бөглөнө үү — &ldquo;Мэдээлэл засах&rdquo; дарж нэмнэ.
+                </div>
+              )}
+            </dl>
+          ) : (
+            <>
+              <div className="mt-4 grid md:grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Овог *</span>
+                  <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="ж: Болд"
+                    className={`mt-1.5 w-full rounded-xl bg-gray-50 border px-4 py-3 text-sm font-medium outline-none focus:border-black ${fieldErrors.lastName ? "border-red-400" : "border-gray-200"}`} />
+                  {fieldErrors.lastName && <span className="text-[11px] font-bold text-red-500">{fieldErrors.lastName}</span>}
+                </label>
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Нэр *</span>
+                  <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="ж: Сараа"
+                    className={`mt-1.5 w-full rounded-xl bg-gray-50 border px-4 py-3 text-sm font-medium outline-none focus:border-black ${fieldErrors.firstName ? "border-red-400" : "border-gray-200"}`} />
+                  {fieldErrors.firstName && <span className="text-[11px] font-bold text-red-500">{fieldErrors.firstName}</span>}
+                </label>
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Төрсөн өдөр *</span>
+                  <input type="date" value={birthDate} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setBirthDate(e.target.value)}
+                    className={`mt-1.5 w-full rounded-xl bg-gray-50 border px-4 py-3 text-sm font-medium outline-none focus:border-black ${fieldErrors.birthDate ? "border-red-400" : "border-gray-200"}`} />
+                  {fieldErrors.birthDate && <span className="text-[11px] font-bold text-red-500">{fieldErrors.birthDate}</span>}
+                </label>
+                <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 self-end">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Нас (автомат)</span>
+                  <div className="mt-1 text-sm font-extrabold text-black">{age !== null ? `${age}` : "—"}</div>
+                </div>
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Нэр (nickname)</span>
+                  <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="ж: Сараа"
+                    className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Сургууль</span>
+                  <input value={school} onChange={(e) => setSchool(e.target.value)} placeholder="ж: СЭЗИС, 2-р курс"
+                    className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
+                </label>
+                <label className="block md:col-span-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Танилцуулга</span>
+                  <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={2} placeholder="Юу хайж байна?"
+                    className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm outline-none focus:border-black" />
+                </label>
+                <label className="block md:col-span-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Сонирхол (таслалаар)</span>
+                  <input value={interests} onChange={(e) => setInterests(e.target.value)} placeholder="ж: Хөгжүүлэгч, Дизайн, Математик"
+                    className="mt-1.5 w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium outline-none focus:border-black" />
+                </label>
+                <div className="md:col-span-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Хайж буй хамтрагч</span>
+                  <div className="mt-1.5 flex gap-2">
+                    {(["study", "business"] as const).map((m) => (
+                      <button key={m} onClick={() => setLookingFor(m)}
+                        className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+                          lookingFor === m ? "bg-brand text-white shadow-sm" : "bg-white text-black border border-gray-200"
+                        }`}>
+                        {m === "study" ? "Study Partner" : "Business Partner"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button onClick={saveProfile} disabled={saving}
+                  className="rounded-full bg-black px-6 py-2.5 text-sm font-bold text-white hover:bg-gray-800 disabled:opacity-50">
+                  {saving ? "Хадгалж байна..." : "Хадгалах"}
+                </button>
+                <button onClick={() => { setEditing(false); setFieldErrors({}); loadMe(); }}
+                  className="rounded-full bg-white border border-gray-200 px-6 py-2.5 text-sm font-bold text-slate-600 hover:bg-gray-50">
+                  Болих
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
 

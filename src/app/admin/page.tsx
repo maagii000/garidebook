@@ -4,13 +4,19 @@ import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { BookStatus, STATUS_LABEL, Category, Condition } from "@/lib/types";
 
-type Tab = "books" | "add" | "payments" | "ai" | "ads" | "hub";
+type Tab = "books" | "add" | "payments" | "ai" | "ads" | "hub" | "users";
 
 interface PendingItem { id: string; title: string; author: string; ownerName: string; createdAt: string; }
 interface PendingAd { id: string; title: string; price: number; description: string; contact: string; owner: string; image: string | null; createdAt: string; }
 interface PendingMaterial { id: string; title: string; subject: string; description: string; fileName: string; fileSize: number; price: number; owner: string; createdAt: string; }
+interface AdminUser {
+  id: string; name: string | null; email: string | null; nickname: string | null;
+  lastName: string; firstName: string; birthDate: string; age: number | null;
+  school: string; bio: string; interests: string; lookingFor: string;
+  role: string; plan: string | null; planEnds: string | null; createdAt: string;
+}
 interface PayRow {
-  id: string; bookTitle: string; buyer: string; amount: number; creditSpent: number;
+  id: string; bookTitle: string; purpose: string; refId: string | null; buyer: string; amount: number; creditSpent: number;
   status: string; method: string; qpayInvoiceId: string | null; qpayPaymentId: string | null;
   ebarimtId: string | null; orderId: string | null; createdAt: string;
 }
@@ -24,6 +30,8 @@ export default function AdminPage() {
   const [payments, setPayments] = useState<PayRow[]>([]);
   const [pendingAds, setPendingAds] = useState<PendingAd[]>([]);
   const [pendingMaterials, setPendingMaterials] = useState<PendingMaterial[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [userQ, setUserQ] = useState("");
   const [aiStats, setAiStats] = useState<{ total: number; byBook: { bookId: string; title: string; count: number }[] }>({ total: 0, byBook: [] });
 
   // add-book form
@@ -55,6 +63,9 @@ export default function AdminPage() {
     }).catch(() => {});
     fetch("/api/admin/materials").then((r) => r.json()).then((d) => {
       if (d.materials) setPendingMaterials(d.materials);
+    }).catch(() => {});
+    fetch("/api/admin/users").then((r) => r.json()).then((d) => {
+      if (d.users) setUsers(d.users);
     }).catch(() => {});
   }
   useEffect(load, [books]);
@@ -103,15 +114,29 @@ export default function AdminPage() {
     load();
   }
 
-  async function confirmPay(paymentId: string) {
-    if (!confirm("Шилжүүлэг орсныг баталгаажуулах уу? Ном нээгдэнэ.")) return;
+  async function syncPay(paymentId: string) {
+    const r = await fetch("/api/admin/payments/sync", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentId }),
+    });
+    const d = await r.json();
+    if (!r.ok) { notify(d.error || "QPay шалгах үед алдаа", "err"); return; }
+    notify(d.status === "PAID" ? "Төлбөр орсон — баталгаажлаа ✓" : "Төлбөр хараахан ороогүй байна");
+    load();
+    refreshAll();
+  }
+
+  async function confirmPay(paymentId: string, method: string) {
+    if (!confirm(method === "TRANSFER"
+      ? "Шилжүүлэг орсныг баталгаажуулах уу? Холбоотой үйлчилгээ шууд идэвхжинэ."
+      : "QPay төлбөрийг гараар баталгаажуулах уу? Холбоотой үйлчилгээ шууд идэвхжинэ.")) return;
     const r = await fetch("/api/admin/payments/confirm", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ paymentId }),
     });
     const d = await r.json();
-    if (!r.ok) { notify(d.error || "Алдаа", "err"); return; }
-    notify("Баталгаажлаа, ном нээгдлээ ✓");
+    if (!r.ok) { notify(d.error || "Баталгаажуулах үед алдаа", "err"); return; }
+    notify("Баталгаажлаа — үйлчилгээ идэвхжлээ ✓");
     load();
     refreshAll();
   }
@@ -209,7 +234,7 @@ export default function AdminPage() {
         <h1 className="text-2xl md:text-3xl font-extrabold text-navy">Админ консол</h1>
 
       <div className="mt-4 flex gap-2 text-sm font-bold flex-wrap">
-        {([["books", "Номууд"], ["ads", "Зарууд"], ["hub", "Материал"], ["add", "Ном нэмэх"], ["payments", "Төлбөрүүд"], ["ai", "AI"]] as [Tab, string][]).map(([v, l]) => (
+        {([["books", "Номууд"], ["ads", "Зарууд"], ["hub", "Материал"], ["users", "Хэрэглэгчид"], ["add", "Ном нэмэх"], ["payments", "Төлбөрүүд"], ["ai", "AI"]] as [Tab, string][]).map(([v, l]) => (
           <button key={v} onClick={() => setTab(v)}
             className={`rounded-full px-4 py-2 border ${tab === v ? "bg-navy text-white border-navy" : "bg-white border-slate-300"}`}>
             {l}
@@ -349,6 +374,87 @@ export default function AdminPage() {
         </div>
       )}
 
+      {tab === "users" && (
+        <div>
+          <h2 className="mt-5 text-xl font-extrabold text-navy">Хэрэглэгчид ({users.length})</h2>
+          <div className="mt-3 flex items-center gap-2 rounded-full bg-white border border-slate-200 px-4 py-2.5 max-w-md">
+            <input
+              value={userQ}
+              onChange={(e) => setUserQ(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  fetch(`/api/admin/users?q=${encodeURIComponent(userQ.trim())}`)
+                    .then((r) => r.json())
+                    .then((d) => { if (d.users) setUsers(d.users); })
+                    .catch(() => {});
+                }
+              }}
+              placeholder="Нэр, имэйл, nickname-ээр хайх... (Enter)"
+              className="w-full bg-transparent text-sm outline-none"
+            />
+            <button
+              onClick={() => {
+                fetch(`/api/admin/users?q=${encodeURIComponent(userQ.trim())}`)
+                  .then((r) => r.json())
+                  .then((d) => { if (d.users) setUsers(d.users); })
+                  .catch(() => {});
+              }}
+              className="shrink-0 rounded-full bg-navy px-4 py-1.5 text-xs font-bold text-white"
+            >
+              Хайх
+            </button>
+          </div>
+          <div className="mt-3 overflow-x-auto rounded-2xl border bg-white">
+            <table className="w-full text-sm min-w-[900px]">
+              <thead>
+                <tr className="text-left text-xs text-slate-400 border-b">
+                  <th className="p-3">Овог нэр / nickname</th>
+                  <th className="p-3">Имэйл</th>
+                  <th className="p-3">Нас / төрсөн</th>
+                  <th className="p-3">Сургууль</th>
+                  <th className="p-3">Багц</th>
+                  <th className="p-3">Бүртгүүлсэн</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id} className="border-b last:border-0 align-top">
+                    <td className="p-3">
+                      <div className="font-bold">
+                        {[u.lastName, u.firstName].filter(Boolean).join(" ") || u.nickname || u.name || "—"}
+                      </div>
+                      <div className="text-xs text-slate-400">
+                        {u.nickname ? `@${u.nickname}` : ""} {u.role === "ADMIN" ? "• Админ" : ""}
+                      </div>
+                      {u.bio && <div className="mt-1 text-xs text-slate-500 max-w-[280px] truncate">{u.bio}</div>}
+                    </td>
+                    <td className="p-3 text-xs break-all">{u.email ?? "—"}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      <span className="font-bold">{u.age !== null ? `${u.age}` : "—"}</span>
+                      <div className="text-xs text-slate-400">{u.birthDate || ""}</div>
+                    </td>
+                    <td className="p-3 text-xs">{u.school || "—"}</td>
+                    <td className="p-3">
+                      {u.plan ? (
+                        <span className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold ${u.plan === "PRO" ? "bg-brand text-white" : "bg-slate-100"}`}>
+                          {u.plan}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">—</span>
+                      )}
+                    </td>
+                    <td className="p-3 text-xs text-slate-500 whitespace-nowrap">{String(u.createdAt).slice(0, 10)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {users.length === 0 && (
+            <div className="mt-3 text-sm text-slate-500">Хэрэглэгч олдсонгүй.</div>
+          )}
+        </div>
+      )}
+
       {tab === "add" && (        <div className="mt-5 max-w-3xl rounded-3xl border bg-white p-5 md:p-7 space-y-4">
           <h2 className="text-xl font-extrabold text-navy">Ebook нэмэх (PDF + AI)</h2>
           <label className="block rounded-2xl border-2 border-dashed border-slate-300 bg-paper p-6 text-center cursor-pointer hover:border-accent"
@@ -436,7 +542,8 @@ export default function AdminPage() {
                 <tr key={p.id} className="border-b last:border-0">
                   <td className="p-3 font-bold">{p.bookTitle}
                     <div className="text-xs font-normal text-slate-400">
-                      {p.buyer} • {p.method === "TRANSFER" ? "Шилжүүлэг" : "QPay"}
+                      {p.buyer} • {p.method === "TRANSFER" ? "Шилжүүлэг" : "QPay"} • {p.purpose}
+                      {p.refId ? ` • ${p.refId.slice(0, 8)}` : ""}
                     </div>
                   </td>
                   <td className="p-3 font-bold">{p.amount.toLocaleString()}₮</td>
@@ -444,8 +551,13 @@ export default function AdminPage() {
                   <td className="p-3 text-xs">{p.ebarimtId ? `✓ ${p.ebarimtId.slice(0, 8)}` : "—"}</td>
                   <td className="p-3">
                     <div className="flex gap-1.5 flex-wrap">
-                      {p.status === "PENDING" && p.method === "TRANSFER" && (
-                        <button onClick={() => confirmPay(p.id)} className="rounded bg-sage px-2.5 py-1 text-xs font-bold text-white">
+                      {p.status === "PENDING" && p.method === "QPAY" && (
+                        <button onClick={() => syncPay(p.id)} className="rounded bg-blue-50 px-2.5 py-1 text-xs font-bold text-brand">
+                          ↻ QPay шалгах
+                        </button>
+                      )}
+                      {p.status === "PENDING" && (
+                        <button onClick={() => confirmPay(p.id, p.method)} className="rounded bg-sage px-2.5 py-1 text-xs font-bold text-white">
                           ✓ Баталгаажуулах
                         </button>
                       )}

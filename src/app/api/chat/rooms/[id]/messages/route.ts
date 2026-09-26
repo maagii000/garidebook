@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, unauthorized, forbidden } from "@/lib/api-auth";
+import { publicName } from "@/lib/profile";
 
 // DM өрөөнд зөвхөн match-ийн 2 тал хандах боломжтой
 async function checkRoomAccess(roomId: string, userId: string | null) {
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     data: {
       roomId: id,
       userId: me.id,
-      userName: me.name ?? me.email?.split("@")[0] ?? "Уншигч",
+      userName: publicName(me as { nickname?: string | null; name?: string | null }),
       text: t,
     },
   });

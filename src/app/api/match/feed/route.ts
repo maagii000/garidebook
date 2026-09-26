@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, unauthorized } from "@/lib/api-auth";
+import { ageOf, publicName } from "@/lib/profile";
 
-function pub(u: { id: string; name: string | null; nickname: string | null; school: string; interests: string; bio: string; image: string | null }) {
+function pub(u: { id: string; name: string | null; nickname: string | null; birthDate: string; school: string; interests: string; bio: string; image: string | null }) {
   return {
     id: u.id,
-    name: u.nickname || u.name || "Оюутан",
+    name: publicName(u),
+    age: ageOf(u.birthDate),
     school: u.school || "",
     interests: u.interests || "",
     bio: u.bio || "",
@@ -22,7 +24,7 @@ export async function GET(req: NextRequest) {
   const exclude = new Set([me.id, ...swiped.map((s) => s.toId)]);
   const users = await db.user.findMany({
     where: { id: { notIn: [...exclude] }, lookingFor: mode },
-    select: { id: true, name: true, nickname: true, school: true, interests: true, bio: true, image: true },
+    select: { id: true, name: true, nickname: true, birthDate: true, school: true, interests: true, bio: true, image: true },
     orderBy: { createdAt: "desc" },
     take: 20,
   });
@@ -36,6 +38,8 @@ export async function DELETE() {
   await db.swipe.deleteMany({ where: { fromId: me.id } });
   return NextResponse.json({ ok: true });
 }
+
+// POST /api/match/feed { toId, dir } — swipe; харилцан баруун бол match + DM
 export async function POST(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
