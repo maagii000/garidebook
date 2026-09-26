@@ -20,6 +20,16 @@ interface PayRow {
   status: string; method: string; qpayInvoiceId: string | null; qpayPaymentId: string | null;
   ebarimtId: string | null; orderId: string | null; createdAt: string;
 }
+interface PayDetail {
+  payment: {
+    id: string; ref: string; amount: number; creditSpent: number; purpose: string;
+    status: string; method: string; qpayInvoiceId: string | null; qpayPaymentId: string | null;
+    ebarimtId: string | null; createdAt: string; paidAt: string | null;
+  };
+  buyer: { id: string; name: string; email: string | null } | null;
+  item: { kind: string; id: string | null; title: string };
+  order: { id: string; cashPaid: number } | null;
+}
 interface UserDetail {
   user: {
     id: string; name: string | null; email: string | null; nickname: string | null;
@@ -199,6 +209,36 @@ export default function AdminPage() {
     if (!r.ok) { notify(d.error || "Алдаа", "err"); return; }
     notify("Цуцлагдлаа");
     load();
+    if (payDetailId) openPay(payDetailId);
+  }
+
+  // Төлбөрийн drawer
+  const [payDetailId, setPayDetailId] = useState<string | null>(null);  const [payDetail, setPayDetail] = useState<PayDetail | null>(null);
+  const [payLoading, setPayLoading] = useState(false);
+
+  function openPay(id: string) {
+    setPayDetailId(id);
+    setPayDetail(null);
+    setPayLoading(true);
+    fetch(`/api/admin/payments/${id}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.payment) setPayDetail(d);
+        setPayLoading(false);
+      })
+      .catch(() => setPayLoading(false));
+  }
+
+  function closePay() {
+    setPayDetailId(null);
+    setPayDetail(null);
+  }
+
+  function copyText(t: string) {
+    navigator.clipboard?.writeText(t).then(
+      () => notify("Хууллаа ✓"),
+      () => notify("Хуулах үед алдаа", "err")
+    );
   }
 
   async function uploadCover(f: File | null) {
@@ -730,8 +770,11 @@ export default function AdminPage() {
                 <tr><td className="p-5 text-center text-slate-400" colSpan={5}>Төлбөр байхгүй байна.</td></tr>
               )}
               {payments.map((p) => (
-                <tr key={p.id} className="border-b last:border-0">
-                  <td className="p-3 font-bold">{p.bookTitle}
+                <tr
+                  key={p.id}
+                  onClick={() => openPay(p.id)}
+                  className="border-b last:border-0 cursor-pointer hover:bg-blue-50/50 transition-colors"
+                >  <td className="p-3 font-bold">{p.bookTitle}
                     <div className="text-xs font-normal text-slate-400">
                       {p.buyer} • {p.method === "TRANSFER" ? "Шилжүүлэг" : "QPay"} • {p.purpose}
                       {p.refId ? ` • ${p.refId.slice(0, 8)}` : ""}
@@ -741,7 +784,7 @@ export default function AdminPage() {
                   <td className="p-3 font-bold">{p.status}</td>
                   <td className="p-3 text-xs">{p.ebarimtId ? `✓ ${p.ebarimtId.slice(0, 8)}` : "—"}</td>
                   <td className="p-3">
-                    <div className="flex gap-1.5 flex-wrap">
+                    <div className="flex gap-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
                       {p.status === "PENDING" && p.method === "QPAY" && (
                         <button onClick={() => syncPay(p.id)} className="rounded bg-blue-50 px-2.5 py-1 text-xs font-bold text-brand">
                           ↻ QPay шалгах
@@ -771,8 +814,187 @@ export default function AdminPage() {
         </div>
       )}
 
-      {tab === "ai" && (
-        <div className="mt-5 rounded-3xl border bg-white p-5">
+      {/* Төлбөрийн дэлгэрэнгүй drawer */}
+      {payDetailId && (
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/40" onClick={closePay} />
+          <div className="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl overflow-y-auto animate-scale-up">
+            <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+              <h3 className="font-extrabold text-black">Төлбөрийн дэлгэрэнгүй</h3>
+              <button onClick={closePay} className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-bold text-slate-600" aria-label="хаах">
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              {payLoading || !payDetail ? (
+                <div className="py-16 text-center text-sm text-slate-400">Ачааллаж байна...</div>
+              ) : (
+                <div className="space-y-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-xl font-extrabold text-black">{payDetail.payment.ref}</div>
+                      <div className="text-xs text-slate-400">ID: {payDetail.payment.id.slice(0, 13)}…</div>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-extrabold ${
+                      payDetail.payment.status === "PAID" ? "bg-emerald-100 text-emerald-700"
+                      : payDetail.payment.status === "PENDING" ? "bg-amber-100 text-amber-700"
+                      : "bg-slate-100 text-slate-500"
+                    }`}>
+                      {payDetail.payment.status}
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl bg-[#F5F5F7] border border-gray-100 p-5">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Нийлбэр</div>
+                    <div className="mt-1 text-3xl font-extrabold text-black">
+                      {payDetail.payment.amount.toLocaleString()}₮
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded-xl bg-white border border-gray-100 px-3 py-2">
+                        <div className="text-slate-400 font-bold">Арга</div>
+                        <div className="font-extrabold">{payDetail.payment.method === "TRANSFER" ? "Шилжүүлэг" : "QPay"}</div>
+                      </div>
+                      <div className="rounded-xl bg-white border border-gray-100 px-3 py-2">
+                        <div className="text-slate-400 font-bold">Зориулалт</div>
+                        <div className="font-extrabold">{payDetail.payment.purpose}</div>
+                      </div>
+                      <div className="rounded-xl bg-white border border-gray-100 px-3 py-2">
+                        <div className="text-slate-400 font-bold">Үүссэн</div>
+                        <div className="font-extrabold">{String(payDetail.payment.createdAt).slice(0, 16).replace("T", " ")}</div>
+                      </div>
+                      <div className="rounded-xl bg-white border border-gray-100 px-3 py-2">
+                        <div className="text-slate-400 font-bold">Төлсөн</div>
+                        <div className="font-extrabold">
+                          {payDetail.payment.paidAt ? String(payDetail.payment.paidAt).slice(0, 16).replace("T", " ") : "—"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-100 p-4">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Худалдан авагч</div>
+                    {payDetail.buyer ? (
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="text-sm font-extrabold text-black truncate">{payDetail.buyer.name}</div>
+                          <div className="text-xs text-slate-500 truncate">{payDetail.buyer.email ?? ""}</div>
+                        </div>
+                        <button
+                          onClick={() => { closePay(); openUser(payDetail.buyer!.id); }}
+                          className="shrink-0 rounded-full bg-brand/10 px-3.5 py-1.5 text-xs font-bold text-brand hover:bg-brand hover:text-white transition-colors"
+                        >
+                          Хэрэглэгч харах →
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-slate-400">Устгагдсан хэрэглэгч</div>
+                    )}
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-100 p-4">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Бараа / үйлчилгээ</div>
+                    <div className="text-sm font-extrabold text-black">{payDetail.item.title}</div>
+                    <div className="text-xs text-slate-400">
+                      {payDetail.item.kind}
+                      {payDetail.item.id ? ` • ${payDetail.item.id.slice(0, 8)}` : ""}
+                    </div>
+                    {payDetail.order && (
+                      <div className="mt-1 text-xs text-slate-500">
+                        Захиалга: {payDetail.order.id.slice(0, 8)} • {payDetail.order.cashPaid.toLocaleString()}₮
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-100 p-4 space-y-2">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">QPay</div>
+                    {[
+                      ["Invoice ID", payDetail.payment.qpayInvoiceId],
+                      ["Payment ID", payDetail.payment.qpayPaymentId],
+                    ].map(([l, v]) => (
+                      <div key={l} className="flex items-center justify-between gap-2 rounded-xl bg-[#F5F5F7] px-3 py-2 text-xs">
+                        <span className="text-slate-500 font-bold">{l}</span>
+                        {v ? (
+                          <span className="flex items-center gap-1.5 min-w-0">
+                            <code className="truncate font-mono">{String(v).slice(0, 20)}…</code>
+                            <button onClick={() => copyText(String(v))} className="shrink-0 rounded-lg bg-white border px-2 py-0.5 font-bold text-brand">
+                              Хуулах
+                            </button>
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">—</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-100 p-4">
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">E-barimt</div>
+                    {payDetail.payment.ebarimtId ? (
+                      <div className="flex items-center justify-between gap-2 text-sm">
+                        <code className="font-mono font-bold">{payDetail.payment.ebarimtId.slice(0, 16)}…</code>
+                        <button onClick={() => copyText(payDetail.payment.ebarimtId!)} className="rounded-lg bg-white border px-2 py-1 text-xs font-bold text-brand">
+                          Хуулах
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-400">Үүсээгүй байна.</div>
+                    )}
+                  </div>
+
+                  <div>
+                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Timeline</div>
+                    <div className="space-y-0">
+                      {[
+                        ["Үүссэн", payDetail.payment.createdAt, true],
+                        ["Төлсөн", payDetail.payment.paidAt, !!payDetail.payment.paidAt],
+                        ["E-barimt", payDetail.payment.ebarimtId ? payDetail.payment.createdAt : null, !!payDetail.payment.ebarimtId],
+                      ].map(([l, v, done], i, arr) => (
+                        <div key={l as string} className="flex gap-3">
+                          <div className="flex flex-col items-center">
+                            <span className={`mt-1 h-3 w-3 rounded-full ${done ? "bg-emerald-500" : "bg-gray-200"}`} />
+                            {i < arr.length - 1 && <span className="w-px flex-1 bg-gray-200" />}
+                          </div>
+                          <div className="pb-4">
+                            <div className={`text-sm font-bold ${done ? "text-black" : "text-slate-400"}`}>{l}</div>
+                            <div className="text-xs text-slate-400">
+                              {v ? String(v).slice(0, 16).replace("T", " ") : "—"}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {payDetail.payment.status === "PENDING" && payDetail.payment.method === "QPAY" && (
+                      <button onClick={() => syncPay(payDetail.payment.id)} className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-brand">
+                        QPay шалгах
+                      </button>
+                    )}
+                    {payDetail.payment.status === "PENDING" && (
+                      <>
+                        <button onClick={() => confirmPay(payDetail.payment.id, payDetail.payment.method)} className="rounded-xl bg-sage px-4 py-2.5 text-sm font-bold text-white">
+                          Баталгаажуулах
+                        </button>
+                        <button onClick={() => cancelPay(payDetail.payment.id)} className="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold">
+                          Цуцлах
+                        </button>
+                      </>
+                    )}
+                    {payDetail.payment.status === "PAID" && !payDetail.payment.ebarimtId && payDetail.payment.qpayPaymentId && (
+                      <button onClick={() => ebarimtRetry(payDetail.payment.id)} className="rounded-xl bg-accent-light px-4 py-2.5 text-sm font-bold text-accent-dark">
+                        Ebarimt дахин
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === "ai" && (        <div className="mt-5 rounded-3xl border bg-white p-5">
           <h2 className="font-extrabold text-navy">AI хэрэглээ (нийт {aiStats.total})</h2>
           <div className="mt-3 space-y-2">
             {aiStats.byBook.length === 0 && <div className="text-sm text-slate-500">Асуулт байхгүй байна.</div>}

@@ -171,7 +171,7 @@ for (const p of ["/api/wishlist", "/api/orders", "/api/users/me", "/api/membersh
   });
 }
 
-for (const p of ["/api/admin/users", "/api/admin/users/xxx"]) {
+for (const p of ["/api/admin/users", "/api/admin/users/xxx", "/api/admin/payments/xxx"]) {
   await check(`GET ${p} → 403 (admin only)`, async () => {
     const r = await get(p);
     assert([401, 403].includes(r.status), `status ${r.status}`);

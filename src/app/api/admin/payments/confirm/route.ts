@@ -13,8 +13,8 @@ export async function POST(req: NextRequest) {
   if (p.status !== "PENDING") return NextResponse.json({ error: "PENDING төлбөр биш байна" }, { status: 400 });
   try {
     const done = await fulfillPayment(paymentId);
-    return NextResponse.json({ ok: true, orderId: done.orderId });
+    return NextResponse.json({ ok: true, orderId: done.orderId, status: done.status });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : "Алдаа" }, { status: 500 });
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Баталгаажуулах үед алдаа" }, { status: 500 });
   }
 }
