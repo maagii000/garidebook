@@ -17,7 +17,6 @@ const NAV = [
   { href: "/membership", label: "Гишүүнчлэл" },
   { href: "/books/new", label: "Ном нэмэх" },
   { href: "/my-books", label: "Миний номууд" },
-  { href: "/wishlist", label: "Хүсэл" },
   { href: "/profile", label: "Кредит данс" },
 ];
 
@@ -183,7 +182,6 @@ export default function Header() {
             <Link href="/membership" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Гишүүнчлэл</Link>
             <Link href="/books/new" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Ном нэмэх (+кредит)</Link>
             <Link href="/my-books" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Миний номууд</Link>
-            <Link href="/wishlist" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хүсэл</Link>
             {authed && <Link href="/profile" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Профайл ({credit} кр)</Link>}
             {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Админ</Link>}
             {!authed && status !== "loading" && <Link href="/login" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 bg-navy text-white text-center">Нэвтрэх</Link>}
