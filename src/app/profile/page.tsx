@@ -4,10 +4,11 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
+import BookCard from "@/components/BookCard";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
-  const { credit, txs, orders, notify } = useStore();
+  const { credit, txs, orders, wishlistBooks, loading, notify } = useStore();
   const [nickname, setNickname] = useState("");
   const [bio, setBio] = useState("");
   const [school, setSchool] = useState("");
@@ -130,6 +131,26 @@ export default function ProfilePage() {
           className="mt-4 rounded-full bg-black px-6 py-2.5 text-sm font-bold text-white hover:bg-gray-800 disabled:opacity-50">
           {saving ? "Хадгалж байна..." : "Хадгалах"}
         </button>
+      </div>
+
+      {/* Хүсэл / Хадгалсан номууд — профайл дотор (ганц эх сурвалж) */}
+      <div id="wishlist" className="mt-6 rounded-3xl border bg-white p-5 scroll-mt-24">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-extrabold text-navy">Хадгалсан номууд ({wishlistBooks.length})</h2>
+        </div>
+        {loading ? (
+          <div className="mt-3 text-sm text-slate-500">Ачааллаж байна...</div>
+        ) : wishlistBooks.length === 0 ? (
+          <div className="mt-3 rounded-2xl border border-dashed bg-paper p-6 text-center text-sm text-slate-500">
+            Хадгалсан ном алга. <Link href="/catalog" className="font-bold text-brand">Хувь хүний хөгжлөөс</Link> ♡ дарж хадгална.
+          </div>
+        ) : (
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+            {wishlistBooks.map((b) => (
+              <BookCard key={b.id} book={b} className="w-full" />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mt-6 grid md:grid-cols-2 gap-5">
