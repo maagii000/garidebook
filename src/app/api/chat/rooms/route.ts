@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireUser } from "@/lib/api-auth";
 
 const DEFAULT_ROOMS = [
   { name: "Санхүү III (Шалгалт)", topic: "Шалгалтын бэлтгэл" },
@@ -7,25 +8,68 @@ const DEFAULT_ROOMS = [
   { name: "Алдсан, олсон зүйлс", topic: "Зар, мэдээлэл" },
 ];
 
-// GET /api/chat/rooms — өрөөнүүд + сүүлийн мессеж (3 query, N+1 үгүй)
+// GET /api/chat/rooms — нийтийн өрөөнүүд + миний DM-үүд (3 query)
 export async function GET() {
-  let rooms = await db.chatRoom.findMany({ orderBy: { createdAt: "asc" }, take: 50 });
+  let me: { id: string; name?: string | null } | null = null;
+  try {
+    me = await requireUser();
+  } catch { /* public */ }
+
+  let rooms = await db.chatRoom.findMany({
+    where: { matchId: null },
+    orderBy: { createdAt: "asc" },
+    take: 50,
+  });
   if (rooms.length === 0) {
-    await db.chatRoom.createMany({ data: DEFAULT_ROOMS });
-    rooms = await db.chatRoom.findMany({ orderBy: { createdAt: "asc" }, take: 50 });
+    const existing = await db.chatRoom.count();
+    if (existing === 0) {
+      await db.chatRoom.createMany({ data: DEFAULT_ROOMS });
+      rooms = await db.chatRoom.findMany({
+        where: { matchId: null },
+        orderBy: { createdAt: "asc" },
+        take: 50,
+      });
+    }
   }
-  const ids = rooms.map((r) => r.id);
+
+  // Миний match DM-үүд (нөгөө талын нэртэй)
+  type DmRoom = { id: string; name: string; partnerName: string };
+  let dms: DmRoom[] = [];
+  if (me) {
+    const matches = await db.match.findMany({
+      where: { OR: [{ aId: me.id }, { bId: me.id }] },
+      include: {
+        a: { select: { id: true, name: true, nickname: true } },
+        b: { select: { id: true, name: true, nickname: true } },
+        chatRoom: { select: { id: true } },
+      },
+    });
+    dms = matches
+      .filter((m) => m.chatRoom)
+      .map((m) => {
+        const p = m.aId === me!.id ? m.b : m.a;
+        const partnerName = p.nickname || p.name || "Хос";
+        return { id: m.chatRoom!.id, name: partnerName, partnerName };
+      });
+  }
+
+  const all = [...rooms.map((r) => ({ id: r.id, name: r.name, dm: false as const })), ...dms.map((d) => ({ id: d.id, name: d.name, dm: true as const }))];
+  const ids = all.map((r) => r.id);
   const [recent, online] = await Promise.all([
-    db.chatMessage.findMany({
-      where: { roomId: { in: ids } },
-      orderBy: { createdAt: "desc" },
-      take: ids.length * 3,
-      select: { roomId: true, text: true, userName: true, createdAt: true },
-    }),
-    db.chatMessage.groupBy({
-      by: ["roomId", "userId"],
-      where: { roomId: { in: ids }, createdAt: { gte: new Date(Date.now() - 10 * 60 * 1000) } },
-    }),
+    ids.length
+      ? db.chatMessage.findMany({
+          where: { roomId: { in: ids } },
+          orderBy: { createdAt: "desc" },
+          take: ids.length * 3,
+          select: { roomId: true, text: true, userName: true, createdAt: true },
+        })
+      : Promise.resolve([]),
+    ids.length
+      ? db.chatMessage.groupBy({
+          by: ["roomId", "userId"],
+          where: { roomId: { in: ids }, createdAt: { gte: new Date(Date.now() - 10 * 60 * 1000) } },
+        })
+      : Promise.resolve([]),
   ]);
   const lastByRoom = new Map<string, { text: string; userName: string; createdAt: Date }>();
   for (const m of recent) {
@@ -39,14 +83,15 @@ export async function GET() {
   }
   return NextResponse.json(
     {
-      rooms: rooms.map((r) => ({
+      rooms: all.map((r) => ({
         id: r.id,
         name: r.name,
-        topic: r.topic,
+        topic: "",
+        dm: r.dm,
         online: onlineByRoom.get(r.id) ?? 0,
         last: lastByRoom.get(r.id) ?? null,
       })),
     },
-    { headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=120" } }
+    { headers: { "Cache-Control": "no-store" } }
   );
 }

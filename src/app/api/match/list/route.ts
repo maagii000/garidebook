@@ -11,6 +11,7 @@ export async function GET() {
     include: {
       a: { select: { id: true, name: true, nickname: true, school: true, interests: true, bio: true, image: true } },
       b: { select: { id: true, name: true, nickname: true, school: true, interests: true, bio: true, image: true } },
+      chatRoom: { select: { id: true } },
     },
     orderBy: { createdAt: "desc" },
     take: 50,
@@ -21,6 +22,7 @@ export async function GET() {
       return {
         id: m.id,
         createdAt: m.createdAt,
+        roomId: m.chatRoom?.id ?? null,
         partner: {
           id: p.id,
           name: p.nickname || p.name || "Оюутан",

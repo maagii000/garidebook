@@ -28,9 +28,10 @@ export default function MatchPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [feed, setFeed] = useState<Person[]>([]);
-  const [matches, setMatches] = useState<{ id: string; partner: Person }[]>([]);
+  const [matches, setMatches] = useState<{ id: string; roomId: string | null; partner: Person }[]>([]);
   const [anim, setAnim] = useState<"left" | "right" | null>(null);
   const [justMatched, setJustMatched] = useState<string | null>(null);
+  const [justMatchedRoom, setJustMatchedRoom] = useState<string | null>(null);
   const [hasProfile, setHasProfile] = useState(true);
   const [mode, setMode] = useState<"study" | "business">("study");
 
@@ -80,6 +81,7 @@ export default function MatchPage() {
         const d = await r.json();
         if (d.matched) {
           setJustMatched(top.name);
+          setJustMatchedRoom(d.roomId ?? null);
           load(mode);
         }
       } catch { /* ignore */ }
@@ -121,8 +123,8 @@ export default function MatchPage() {
           <div className="text-2xl font-extrabold">Match!</div>
           <p className="mt-1 text-sm text-gray-300">{justMatched} тантай танилцахад бэлэн.</p>
           <div className="mt-4 flex gap-2 justify-center">
-            <Link href="/chat" className="rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white">Чат нээх</Link>
-            <button onClick={() => setJustMatched(null)} className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-bold">Үргэлжлүүлэх</button>
+            <Link href={justMatchedRoom ? `/chat?room=${justMatchedRoom}` : "/chat"} className="rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white">Чат нээх</Link>
+            <button onClick={() => { setJustMatched(null); setJustMatchedRoom(null); }} className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-bold">Үргэлжлүүлэх</button>
           </div>
         </div>
       )}
@@ -193,7 +195,7 @@ export default function MatchPage() {
                   <h5 className="font-bold text-xs text-black truncate">{m.partner.name}</h5>
                   <p className="text-[10px] text-slate-500 truncate">{m.partner.school}</p>
                 </div>
-                <Link href="/chat" className="px-3 py-1.5 rounded-xl bg-brand/10 text-brand text-xs font-semibold hover:bg-brand hover:text-white transition-colors shrink-0">
+                <Link href={m.roomId ? `/chat?room=${m.roomId}` : "/chat"} className="px-3 py-1.5 rounded-xl bg-brand/10 text-brand text-xs font-semibold hover:bg-brand hover:text-white transition-colors shrink-0">
                   Чат
                 </Link>
               </div>

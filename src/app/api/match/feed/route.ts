@@ -47,19 +47,42 @@ export async function POST(req: NextRequest) {
   });
 
   let matched = false;
+  let roomId: string | null = null;
   if (dir === "right") {
     const back = await db.swipe.findUnique({
       where: { fromId_toId: { fromId: toId, toId: me.id } },
     });
     if (back?.dir === "right") {
       const [aId, bId] = [me.id, toId].sort();
-      await db.match.upsert({
+      const m = await db.match.upsert({
         where: { aId_bId: { aId, bId } },
         update: {},
         create: { aId, bId },
       });
       matched = true;
+      // Хувийн чат өрөө нээх (idempotent)
+      const room = await db.chatRoom.upsert({
+        where: { matchId: m.id },
+        update: {},
+        create: {
+          name: "Хувийн чат",
+          topic: "Match",
+          matchId: m.id,
+        },
+      });
+      const hasMsg = await db.chatMessage.findFirst({ where: { roomId: room.id } });
+      if (!hasMsg) {
+        await db.chatMessage.create({
+          data: {
+            roomId: room.id,
+            userId: me.id,
+            userName: "Систем",
+            text: "Та хоёр таарлаа! Энд чөлөөтэй чатлаарай.",
+          },
+        });
+      }
+      roomId = room.id;
     }
   }
-  return NextResponse.json({ ok: true, matched });
+  return NextResponse.json({ ok: true, matched, roomId });
 }

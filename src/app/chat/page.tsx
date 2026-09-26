@@ -8,6 +8,7 @@ interface Room {
   id: string;
   name: string;
   topic: string;
+  dm: boolean;
   online: number;
   last: { text: string; userName: string; createdAt: string } | null;
 }
@@ -43,12 +44,17 @@ export default function ChatPage() {
   const myId = (session?.user as { id?: string } | undefined)?.id;
 
   useEffect(() => {
+    const want = new URLSearchParams(window.location.search).get("room");
     fetch("/api/chat/rooms")
       .then((r) => r.json())
       .then((d) => {
         if (Array.isArray(d.rooms)) {
           setRooms(d.rooms);
-          if (d.rooms.length > 0) setRoomId((cur) => cur ?? d.rooms[0].id);
+          if (want && d.rooms.some((r: { id: string }) => r.id === want)) {
+            setRoomId(want);
+          } else if (d.rooms.length > 0) {
+            setRoomId((cur) => cur ?? d.rooms[0].id);
+          }
         }
       })
       .catch(() => {});
@@ -142,7 +148,10 @@ export default function ChatPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-2">
-                      <h4 className={`font-bold text-xs truncate ${r.id === roomId ? "text-black" : "text-gray-700"}`}>{r.name}</h4>
+                      <h4 className={`font-bold text-xs truncate ${r.id === roomId ? "text-black" : "text-gray-700"}`}>
+                        {r.name}
+                        {r.dm && <span className="ml-1.5 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">Хувийн</span>}
+                      </h4>
                       {r.last && <span className="text-[10px] text-gray-400 shrink-0">{fmtTime(r.last.createdAt)}</span>}
                     </div>
                     <p className="text-[11px] text-slate-500 truncate">
