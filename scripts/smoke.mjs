@@ -69,7 +69,7 @@ for (const p of ["/hub", "/membership", "/ads", "/catalog", "/login"]) {
   });
 }
 
-for (const p of ["/chat", "/match", "/profile", "/books/new", "/ads/new", "/hub/new", "/admin"]) {
+for (const p of ["/chat", "/match", "/profile", "/ads/new", "/hub/new", "/admin"]) {
   await check(`GET ${p} → login redirect`, async () => {
     const r = await get(p);
     assert([307, 308].includes(r.status), `status ${r.status}`);
@@ -78,6 +78,28 @@ for (const p of ["/chat", "/match", "/profile", "/books/new", "/ads/new", "/hub/
     return "redirect ok";
   });
 }
+
+for (const p of ["/books/new", "/my-books"]) {
+  await check(`GET ${p} → 404 removed`, async () => {
+    const r = await get(p);
+    assert(r.status === 404, `status ${r.status}`);
+    return "gone ok";
+  });
+}
+
+await check("GET /api/credits/me → 404 removed", async () => {
+  const r = await get("/api/credits/me");
+  assert(r.status === 404, `status ${r.status}`);
+});
+
+await check("POST /api/books → 405 no user upload", async () => {
+  const r = await get("/api/books", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  });
+  assert([404, 405].includes(r.status), `status ${r.status}`);
+});
 
 // ---------- Public APIs ----------
 await check("GET /api/books", async () => {
@@ -131,7 +153,7 @@ await check("GET /api/books/[id] 404", async () => {
 });
 
 // ---------- Auth guards (401/redirect, 500 биш) ----------
-for (const p of ["/api/credits/me", "/api/wishlist", "/api/orders", "/api/users/me", "/api/membership"]) {
+for (const p of ["/api/wishlist", "/api/orders", "/api/users/me", "/api/membership"]) {
   await check(`GET ${p} → 401`, async () => {
     const r = await get(p);
     assert(r.status === 401, `status ${r.status}`);
