@@ -37,7 +37,12 @@ async function getToken(): Promise<string> {
   });
   if (!r.ok) throw new Error(`QPay нэвтрэхэд алдаа (${r.status}). Шилжүүлгээр оролдоно уу.`);
   const d = await r.json();
-  tokenCache = { token: d.access_token, exp: d.expires_in * 1000 };
+  if (!d.access_token) throw new Error("QPay token хоосон ирлээ.");
+  // expires_in: ихэвчлэн абсолют timestamp (сек), заримдаа үлдсэн секунд.
+  // 1e11-ээс их бол timestamp гэж үзнэ.
+  const raw = Number(d.expires_in || 3600);
+  const exp = raw > 1e11 ? raw * 1000 : Date.now() + Math.max(60_000, raw * 1000);
+  tokenCache = { token: d.access_token, exp };
   return d.access_token;
 }
 

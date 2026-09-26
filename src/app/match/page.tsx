@@ -32,6 +32,18 @@ export default function MatchPage() {
   const [anim, setAnim] = useState<"left" | "right" | null>(null);
   const [justMatched, setJustMatched] = useState<string | null>(null);
   const [justMatchedRoom, setJustMatchedRoom] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
+
+  // Дахин эхлэх: миний swipe-үүдийг цэвэрлэж deck-ийг шинээр ачаална
+  async function resetDeck() {
+    setResetting(true);
+    try {
+      await fetch("/api/match/feed", { method: "DELETE" });
+    } catch { /* ignore */ }
+    setFeed([]);
+    setResetting(false);
+    load(mode);
+  }
   const [hasProfile, setHasProfile] = useState(true);
   const [mode, setMode] = useState<"study" | "business">("study");
 
@@ -175,7 +187,7 @@ export default function MatchPage() {
             <h4 className="font-bold text-lg text-black">Бүх хүмүүсийг харж дууслаа!</h4>
             <p className="text-xs text-slate-500">Дараа эргэж ирээрэй — эсвэл танилцуулгаа баяжуул.</p>
             <div className="flex gap-2 justify-center">
-              <button onClick={() => load(mode)} className="px-5 py-2.5 rounded-full bg-brand text-white text-xs font-medium">Дахин эхлэх</button>
+              <button onClick={resetDeck} disabled={resetting} className="px-5 py-2.5 rounded-full bg-brand text-white text-xs font-medium disabled:opacity-50">Дахин эхлэх</button>
               <Link href="/profile" className="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-xs font-bold text-black">
                 Профайл засах
               </Link>

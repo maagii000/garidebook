@@ -29,7 +29,13 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ feed: users.map(pub) });
 }
 
-// POST /api/match/swipe { toId, dir } — харилцан баруун бол match
+// DELETE /api/match/feed — миний бүх swipe цэвэрлэх (Дахин эхлэх)
+export async function DELETE() {
+  const me = await requireUser();
+  if (!me) return unauthorized();
+  await db.swipe.deleteMany({ where: { fromId: me.id } });
+  return NextResponse.json({ ok: true });
+}
 export async function POST(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
