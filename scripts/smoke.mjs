@@ -79,10 +79,12 @@ for (const p of ["/chat", "/match", "/profile", "/ads/new", "/hub/new", "/admin"
   });
 }
 
-for (const p of ["/books/new", "/my-books"]) {
-  await check(`GET ${p} → 404 removed`, async () => {
+for (const [p, dest] of [["/books/new", "/catalog"], ["/my-books", "/profile"]]) {
+  await check(`GET ${p} → redirect ${dest}`, async () => {
     const r = await get(p);
-    assert(r.status === 404, `status ${r.status}`);
+    assert([307, 308].includes(r.status), `status ${r.status}`);
+    const loc = r.headers.get("location") || "";
+    assert(loc.includes(dest), `location=${loc}`);
     return "gone ok";
   });
 }
