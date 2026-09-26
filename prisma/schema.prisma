@@ -131,6 +131,7 @@ model User {
   swipesGot     Swipe[]   @relation("SwipeTo")
   matchesA      Match[]   @relation("MatchA")
   matchesB      Match[]   @relation("MatchB")
+  sleepLogs     SleepLog[]
 }
 
 model Book {
@@ -424,4 +425,19 @@ model Match {
   createdAt DateTime @default(now())
 
   @@unique([aId, bId])
+}
+
+model SleepLog {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date    String
+  bedMin  Int
+  wakeMin Int
+  quality Int    @default(3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
 }

@@ -16,6 +16,7 @@ const PROTECTED = [
   "/hub/new",
   "/chat",
   "/match",
+  "/wellness",
 ];
 
 function isProtected(pathname: string) {
