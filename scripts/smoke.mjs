@@ -28,8 +28,17 @@ function assert(cond, msg) {
 }
 
 async function get(path, opts = {}) {
-  const r = await fetch(BASE + path, { redirect: "manual", ...opts });
-  return r;
+  // Түр зуурын сүлжээ тасалдсанд 1 удаа дахин оролдоно
+  let lastErr;
+  for (let i = 0; i < 2; i++) {
+    try {
+      return await fetch(BASE + path, { redirect: "manual", ...opts });
+    } catch (e) {
+      lastErr = e;
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+  throw lastErr;
 }
 
 async function jget(path) {
