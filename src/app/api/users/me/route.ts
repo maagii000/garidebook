@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
   const { nickname, bio, school, interests, lookingFor } = await req.json();
-  const updated = await db.user.update({
+  await db.user.update({
     where: { id: me.id },
     data: {
       nickname: String(nickname || "").trim().slice(0, 30) || null,

@@ -8,15 +8,6 @@ import PayModal from "@/components/PayModal";
 import { Reveal } from "@/components/Reveal";
 import { MEMBERSHIP_PRICES, type MembershipPlan } from "@/lib/payments";
 
-function SparklesIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M12 3v3m0 12v3M5.6 5.6l2.2 2.2m8.4 8.4 2.2 2.2M3 12h3m12 0h3M5.6 18.4l2.2-2.2m8.4-8.4 2.2-2.2" />
-      <circle cx="12" cy="12" r="3.2" />
-    </svg>
-  );
-}
-
 function CheckCircleIcon({ className = "" }: { className?: string }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>

@@ -66,7 +66,6 @@ export default function MatchPage() {
   }
 
   const top = feed[0] ?? null;
-  const next = feed[1] ?? null;
 
   async function swipe(dir: "left" | "right") {
     if (!top || anim) return;
