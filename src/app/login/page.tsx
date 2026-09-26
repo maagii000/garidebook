@@ -17,7 +17,7 @@ function LoginInner() {
           </div>
         )}
         <p className="text-sm text-slate-500 mt-1">
-          Level Up Hub-д Google хаягаараа нэвтэрч кредитээ удирдаарай.
+          Level Up Hub-д Google хаягаараа нэвтэрнэ үү.
         </p>
 
         <button
@@ -28,7 +28,7 @@ function LoginInner() {
         </button>
 
         <p className="mt-5 text-[11px] text-slate-400">
-          Бүртгүүлмэгц +120 кредит бэлгэнд олгоно (анхны нэвтрэлтээр).
+          Нэвтэрснээр ном худалдаж авах, хадгалах, чатлах боломжтой.
         </p>
       </div>
     </div>

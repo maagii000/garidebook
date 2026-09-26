@@ -1,11 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Book,
-  CONDITION_LABEL,
-  CREDIT_TO_MNT,
-  MAX_CREDIT_USE_PER_ORDER,
-} from "@/lib/types";
+import { Book, CONDITION_LABEL } from "@/lib/types";
 import RatingStars from "./RatingStars";
 import CoverArt from "./CoverArt";
 
@@ -16,20 +11,8 @@ const CONDITION_BADGE: Record<string, string> = {
   used: "bg-slate-500",
 };
 
-export function creditQuote(priceCash: number) {
-  const maxDiscount = MAX_CREDIT_USE_PER_ORDER * CREDIT_TO_MNT; // 2000₮
-  const discount = Math.min(maxDiscount, Math.max(0, priceCash - 1000));
-  return {
-    maxDiscount,
-    discount,
-    finalCash: Math.max(0, priceCash - discount),
-    creditNeeded: Math.round(discount / CREDIT_TO_MNT),
-  };
-}
-
 export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }: { book: Book; className?: string }) {
   const cover = book.images?.[0] || book.coverUrl;
-  const q = creditQuote(book.priceCash);
   return (
     <Link
       href={`/books/${book.id}`}
@@ -77,22 +60,14 @@ export default function BookCard({ book, className = "w-[160px] md:w-[180px]" }:
           </div>
         )}
 
-        {/* Кредит-first үнэ блок */}
+        {/* Үнэ */}
         <div className="mt-2 rounded-xl bg-slate-50 px-2.5 py-2">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[11px] text-slate-400 line-through">
-              {book.priceCash.toLocaleString()}₮
-            </span>
-            <span className="text-sm font-extrabold text-navy">
-              {q.finalCash.toLocaleString()}₮
-            </span>
-            {book.source !== "official" && (
-              <span className="ml-auto text-[10px] font-bold text-slate-400">P2P</span>
-            )}
-          </div>
-          <div className="mt-0.5 text-[11px] font-bold text-accent-dark">
-            {q.creditNeeded}кр → −{q.discount.toLocaleString()}₮
-          </div>
+          <span className="text-sm font-extrabold text-navy">
+            {book.priceCash.toLocaleString()}₮
+          </span>
+          {book.source !== "official" && (
+            <span className="ml-1.5 text-[10px] font-bold text-slate-400">P2P</span>
+          )}
         </div>
       </div>
     </Link>

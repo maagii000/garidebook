@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Level Up Hub — Сурагчдын ухаалаг хөгжих орчин",
   description:
-    "Уншсан номоо оруулж кредит цуглуул, кредит + мөнгөөр хямд ном ав. ЕБС сурагч, оюутанд зориулсан P2P номын маркетплейс.",
+    "Ном, материал, хамтрагч — сурагчдын ухаалаг хөгжих орчин.",
 };
 
 export default function RootLayout({

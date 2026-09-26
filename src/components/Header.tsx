@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { useStore } from "@/lib/store";
-import WalletModal from "@/components/WalletModal";
 
 const NAV = [
   { href: "/catalog", label: "Хувь хүний хөгжил" },
@@ -15,16 +13,12 @@ const NAV = [
   { href: "/match", label: "Хосоо ол" },
   { href: "/wellness", label: "Positive орчин" },
   { href: "/membership", label: "Гишүүнчлэл" },
-  { href: "/books/new", label: "Ном нэмэх" },
-  { href: "/my-books", label: "Миний номууд" },
-  { href: "/profile", label: "Кредит данс" },
+  { href: "/profile", label: "Профайл" },
 ];
 
 export default function Header() {
   const { data: session, status } = useSession();
-  const { credit } = useStore();
   const [open, setOpen] = useState(false);
-  const [walletOpen, setWalletOpen] = useState(false);
   const [q, setQ] = useState("");
   const router = useRouter();
   const pathname = usePathname();
@@ -41,7 +35,7 @@ export default function Header() {
 
   return (
     <header className="glass-nav sticky top-0 z-40">
-      {/* Дээд эгнээ: logo + search + кредит + profile */}
+      {/* Дээд эгнээ: logo + search + profile */}
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center gap-3">
           <Link href="/" className="flex items-center shrink-0" aria-label="Level Up Hub">
@@ -66,16 +60,6 @@ export default function Header() {
           </form>
 
           <div className="ml-auto flex items-center gap-2">
-            {authed && (
-              <button
-                onClick={() => setWalletOpen(true)}
-                title="Кредит хэтэвч"
-                className="hidden sm:flex items-center gap-1.5 rounded-full bg-white/80 border border-gray-200 px-3 py-1.5 text-sm font-semibold shadow-sm hover:border-brand transition"
-              >
-                <span className="h-2 w-2 rounded-full bg-brand" />
-                {credit} кр
-              </button>
-            )}
             {status === "loading" ? (
               <span className="text-sm text-slate-400">...</span>
             ) : authed ? (
@@ -131,11 +115,6 @@ export default function Header() {
                 }`}
               >
                 {n.label}
-                {n.href === "/books/new" && (
-                  <span className="ml-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700">
-                    +кредит
-                  </span>
-                )}
               </Link>
             );
           })}
@@ -180,9 +159,7 @@ export default function Header() {
             <Link href="/match" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Хосоо ол</Link>
             <Link href="/wellness" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Positive орчин</Link>
             <Link href="/membership" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Гишүүнчлэл</Link>
-            <Link href="/books/new" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Ном нэмэх (+кредит)</Link>
-            <Link href="/my-books" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Миний номууд</Link>
-            {authed && <Link href="/profile" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Профайл ({credit} кр)</Link>}
+            {authed && <Link href="/profile" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Профайл</Link>}
             {isAdmin && <Link href="/admin" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 hover:bg-slate-50">Админ</Link>}
             {!authed && status !== "loading" && <Link href="/login" onClick={() => setOpen(false)} className="rounded-lg px-2 py-2 bg-navy text-white text-center">Нэвтрэх</Link>}
             {authed && (
@@ -191,7 +168,6 @@ export default function Header() {
           </nav>
         </div>
       )}
-      {walletOpen && <WalletModal onClose={() => setWalletOpen(false)} />}
     </header>
   );
 }

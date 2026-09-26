@@ -131,9 +131,8 @@ export default function BookDetailPage() {
 
           <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-slate-400 font-bold">ҮНЭ (туршилт)</div>
+              <div className="text-xs text-slate-400 font-bold">ҮНЭ</div>
               <div className="text-3xl font-extrabold text-navy">{book.priceCash.toLocaleString()}₮</div>
-              <div className="text-xs text-slate-500">+ кредитээр 2,000₮ хүртэл хямдруулж болно</div>
             </div>
             <button
               onClick={() => { if (!session) { router.push("/login"); return; } toggleWishlist(book.id); }}
@@ -149,7 +148,7 @@ export default function BookDetailPage() {
               onClick={() => router.push(session ? `/checkout/${book.id}` : "/login")}
               className="flex-1 rounded-xl bg-accent px-5 py-3.5 font-extrabold text-white hover:bg-accent-dark disabled:opacity-40"
             >
-              {book.status === "sold" ? "Зарагдсан" : "Кредит + Мөнгөөр авах"}
+              {book.status === "sold" ? "Зарагдсан" : "Худалдаж авах"}
             </button>
           </div>
           {book.hasPdf && (
@@ -237,7 +236,7 @@ export default function BookDetailPage() {
           )}
           <div className="min-w-0 flex-1">
             <div className="truncate text-[13px] font-bold text-slate-900">{book.title}</div>
-            <div className="text-sm font-extrabold text-navy">{book.priceCash.toLocaleString()}₮ <span className="text-[11px] font-bold text-accent-dark">−2,000₮ кр</span></div>
+            <div className="text-sm font-extrabold text-navy">{book.priceCash.toLocaleString()}₮</div>
           </div>
           <button
             disabled={book.status === "sold"}

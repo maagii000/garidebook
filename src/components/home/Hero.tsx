@@ -72,7 +72,7 @@ export default function Hero({ bookCount }: { bookCount: number }) {
             Илүү ухаалаг унш, <br /><span className="text-brand">Хамтдаа хэмнэ.</span>
           </h1>
           <p className="hero-enter text-lg text-slate-500 max-w-xl mx-auto lg:mx-0" style={{ "--hero-delay": "160ms" } as CSSProperties}>
-            Уншсан номоо оруулаад кредит цуглуулж, хямд ном ав. Материал, чат, хамтрагч — бүхэн нэг дор.
+            Хямд ном ав. Материал, чат, хамтрагч — бүхэн нэг дор.
           </p>
           <div className="hero-enter flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2" style={{ "--hero-delay": "240ms" } as CSSProperties}>
             <Link href="/catalog" className="px-7 py-3.5 rounded-full bg-brand text-white font-medium hover:bg-brand-dark shadow-lg transition-all flex items-center gap-2">
@@ -89,12 +89,12 @@ export default function Hero({ bookCount }: { bookCount: number }) {
               <div className="text-xs text-slate-500">Ном</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-black"><CountUp to={120} prefix="+" /></div>
-              <div className="text-xs text-slate-500">Кредит / ном</div>
+              <div className="text-2xl font-bold text-black"><CountUp to={6} suffix="+" /></div>
+              <div className="text-xs text-slate-500">Хэсэг</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-black"><CountUp to={2000} prefix="−" suffix="₮" /></div>
-              <div className="text-xs text-slate-500">Хямдрал</div>
+              <div className="text-2xl font-bold text-black">100%</div>
+              <div className="text-xs text-slate-500">Үнэгүй чат</div>
             </div>
           </div>
         </div>

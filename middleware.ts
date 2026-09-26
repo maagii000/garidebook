@@ -6,9 +6,7 @@ const CANONICAL_HOST = "blackup.ink";
 
 const PROTECTED = [
   "/profile",
-  "/my-books",
   "/wishlist",
-  "/books/new",
   "/checkout",
   "/read",
   "/admin",

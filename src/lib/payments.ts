@@ -1,6 +1,5 @@
 import { db } from "./db";
 import { checkInvoice, createEbarimt } from "./qpay";
-import { CREDIT_TO_MNT } from "./types";
 
 export const PAYMENT_PURPOSES = ["BOOK", "UPLOAD_FEE", "AD_FEE", "MEMBERSHIP", "MATERIAL"] as const;
 export type PaymentPurpose = (typeof PAYMENT_PURPOSES)[number];
@@ -74,23 +73,14 @@ export async function fulfillPayment(paymentId: string, qpayPaymentId?: string) 
       });
     }
 
-    const use = payment.creditSpent;
     if (!payment.bookId || !payment.book) throw new Error("Ном олдсонгүй");
-    if (use > 0) {
-      const buyer = await tx.user.findUnique({ where: { id: payment.buyerId } });
-      if (!buyer || buyer.credit < use) throw new Error("Кредит хүрэлцэхгүй байна");
-      await tx.user.update({ where: { id: payment.buyerId }, data: { credit: { decrement: use } } });
-      await tx.creditTx.create({
-        data: { userId: payment.buyerId, amount: -use, reason: "Худалдан авалтад зарцуулсан", bookId: payment.bookId },
-      });
-    }
 
     const order = await tx.order.create({
       data: {
         bookId: payment.bookId,
         buyerId: payment.buyerId,
         cashPaid: payment.amount,
-        creditSpent: use,
+        creditSpent: 0,
       },
     });
 
@@ -122,9 +112,4 @@ export async function fulfillPayment(paymentId: string, qpayPaymentId?: string) 
       include: { book: true },
     });
   });
-}
-
-export function cashAfterCredit(priceCash: number, creditToUse: number, buyerCredit: number, maxUse: number) {
-  const use = Math.max(0, Math.min(Math.floor(Number(creditToUse) || 0), buyerCredit, maxUse, Math.floor(priceCash / CREDIT_TO_MNT)));
-  return { use, cash: priceCash - use * CREDIT_TO_MNT };
 }

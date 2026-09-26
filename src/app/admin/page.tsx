@@ -439,7 +439,7 @@ export default function AdminPage() {
                       {p.buyer} • {p.method === "TRANSFER" ? "Шилжүүлэг" : "QPay"}
                     </div>
                   </td>
-                  <td className="p-3">{p.amount.toLocaleString()}₮ + {p.creditSpent}кр</td>
+                  <td className="p-3 font-bold">{p.amount.toLocaleString()}₮</td>
                   <td className="p-3 font-bold">{p.status}</td>
                   <td className="p-3 text-xs">{p.ebarimtId ? `✓ ${p.ebarimtId.slice(0, 8)}` : "—"}</td>
                   <td className="p-3">

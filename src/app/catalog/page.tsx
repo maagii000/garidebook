@@ -125,14 +125,14 @@ function CatalogInner() {
         </select>
       </div>
       <p className="mt-2 text-xs text-slate-400">
-        Бүх үнэ дээр кредит ашиглаж −2,000₮ хүртэл хямдруулж болно.
+        Албан ёсны номууд + сурагчдын солилцоо
       </p>
 
       {list.length === 0 ? (
         <div className="mt-10 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
           <div className="mt-3 font-extrabold text-slate-900">Ном олдсонгүй</div>
           <p className="mt-1 text-sm text-slate-500">
-            Шүүлтүүрээ суллах эсвэл эхний номоо өөрөө оруулаад кредит аваарай.
+            Шүүлтүүрээ суллана уу.
           </p>
           <button
             onClick={() => { setQ(""); setTab("all"); setCat(""); }}

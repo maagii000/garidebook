@@ -22,19 +22,17 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         const u = await db.user.findUnique({
           where: { id: user.id },
-          select: { role: true, credit: true },
+          select: { role: true },
         });
         token.role = u?.role ?? "USER";
-        token.credit = u?.credit ?? 120;
       } else if (token.sub) {
-        // refresh role/credit on each request (cheap single-row lookup)
+        // refresh role on each request (cheap single-row lookup)
         const u = await db.user.findUnique({
           where: { id: token.sub },
-          select: { role: true, credit: true },
+          select: { role: true },
         });
         if (u) {
           token.role = u.role;
-          token.credit = u.credit;
         }
       }
       return token;
@@ -43,7 +41,6 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         (session.user as { role?: string }).role = (token.role as string) ?? "USER";
-        (session.user as { credit?: number }).credit = (token.credit as number) ?? 0;
       }
       return session;
     },

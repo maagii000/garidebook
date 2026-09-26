@@ -119,7 +119,7 @@ export default function WellnessPage() {
     const d = await r.json();
     setSaving(false);
     if (!r.ok) { notify(d.error || "Алдаа", "err"); return; }
-    notify(d.earned > 0 ? `${d.log.hours} цаг бүртгэгдлээ +${d.earned} кредит` : `${d.log.hours} цаг бүртгэгдлээ`);
+    notify(`${d.log.hours} цаг бүртгэгдлээ`);
     refreshAll(true);
     const l = await fetch("/api/sleep").then((x) => x.json()).catch(() => null);
     if (l) { setLogs(l.logs ?? []); setStreak(l.streak ?? 0); }
@@ -185,7 +185,7 @@ export default function WellnessPage() {
       <div className="grid lg:grid-cols-2 gap-6 mt-6">
         {logs.length > 0 && !loggedToday && (
           <div className="lg:col-span-2 rounded-2xl border border-blue-100 bg-blue-50/60 px-5 py-3.5 text-sm flex flex-wrap items-center gap-2">
-            <span className="font-bold text-black">Өнөөдрийн нойроо бүртгэж +5 кредит аваарай.</span>
+            <span className="font-bold text-black">Өнөөдрийн нойроо бүртгээрэй.</span>
             <span className="text-slate-500">Доорх формоор 1 минутад.</span>
           </div>
         )}

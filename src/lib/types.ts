@@ -79,14 +79,5 @@ export const STATUS_LABEL: Record<BookStatus, string> = {
   rejected: "Татгалзсан",
 };
 
-// ---- Credit Engine дүрэм (MVP prototype) ----
-export const CREDIT_FOR_CONDITION: Record<Condition, number> = {
-  new: 120,
-  like_new: 100,
-  good: 80,
-  used: 60,
-};
-export const CREDIT_TO_MNT = 10; // 1 кредит = 10₮
-export const MAX_CREDIT_PER_DAY = 3; // өдөрт max 3 пост кредит авна
-export const MAX_CREDIT_USE_PER_ORDER = 200; // 1 захиалгад max 200 кредит = 2000₮ хөнгөлөлт
+// ---- Үнийн суурь (MVP prototype) ----
 export const BASE_PRICE = 5000;

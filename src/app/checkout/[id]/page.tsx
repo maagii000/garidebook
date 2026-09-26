@@ -4,7 +4,6 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/lib/store";
-import { MAX_CREDIT_USE_PER_ORDER, CREDIT_TO_MNT } from "@/lib/types";
 
 interface PayState {
   paymentId: string;
@@ -26,9 +25,8 @@ interface TransferState {
 export default function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { books, credit, checkout, notify, refreshAll } = useStore();
+  const { books, checkout, notify, refreshAll } = useStore();
   const book = books.find((b) => b.id === id);
-  const [use, setUse] = useState(100);
   const [busy, setBusy] = useState(false);
   const [method, setMethod] = useState<"qpay" | "transfer">("qpay");
   const [pay, setPay] = useState<PayState | null>(null);
@@ -43,16 +41,14 @@ export default function CheckoutPage() {
   if (!book) return <div className="p-10 text-center">Ном олдсонгүй</div>;
   const isEbook = !!book.hasPdf;
 
-  const maxUse = Math.min(credit, MAX_CREDIT_USE_PER_ORDER, Math.floor(book.priceCash / CREDIT_TO_MNT));
-  const clamped = Math.max(0, Math.min(use, maxUse));
-  const cash = book.priceCash - clamped * CREDIT_TO_MNT;
+  const cash = book.priceCash;
 
   async function submitPhysical() {
     setBusy(true);
-    const res = await checkout(book!.id, clamped);
+    const res = await checkout(book!.id);
     setBusy(false);
     if ("error" in res) { notify(res.error, "err"); return; }
-    notify(`Захиалга амжилттай! ${res.order.cashPaid.toLocaleString()}₮ + ${res.order.creditSpent} кредит ✓`);
+    notify(`Захиалга амжилттай! ${res.order.cashPaid.toLocaleString()}₮ ✓`);
     router.push("/profile");
   }
 
@@ -62,7 +58,7 @@ export default function CheckoutPage() {
       const r = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookId: book!.id, creditToUse: clamped, method }),
+        body: JSON.stringify({ bookId: book!.id, method }),
       });
       const d = await r.json();
       if (!r.ok) { notify(d.error || "Төлбөр үүсгэхэд алдаа", "err"); return; }
@@ -209,7 +205,7 @@ export default function CheckoutPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <Link href={`/books/${book.id}`} className="text-sm font-bold text-slate-500">← Ном руу буцах</Link>
-      <h1 className="mt-2 text-2xl md:text-3xl font-extrabold text-navy">Төлбөр — Кредит + Мөнгө</h1>
+      <h1 className="mt-2 text-2xl md:text-3xl font-extrabold text-navy">Төлбөр</h1>
       {isEbook && (
         <p className="mt-1 text-sm text-slate-500">Ebook — төлсний дараа унших + AI эрх нээгдэнэ. Татаж авах боломжгүй.</p>
       )}
@@ -219,23 +215,7 @@ export default function CheckoutPage() {
         <div className="text-sm text-slate-500">{book.author}</div>
 
         <div className="mt-4 rounded-2xl bg-paper border p-4">
-          <div className="flex justify-between text-sm">
-            <span>Суурь үнэ</span>
-            <b>{book.priceCash.toLocaleString()}₮</b>
-          </div>
-          <div className="mt-3">
-            <div className="flex justify-between text-sm font-bold">
-              <span>Ашиглах кредит (таны үлдэгдэл: {credit})</span>
-              <span className="text-accent-dark">{clamped} кр = −{(clamped * CREDIT_TO_MNT).toLocaleString()}₮</span>
-            </div>
-            <input type="range" min={0} max={maxUse} value={clamped}
-              onChange={(e) => setUse(Number(e.target.value))}
-              className="mt-2 w-full accent-[#FF7A00]" />
-            <div className="flex justify-between text-[11px] text-slate-400">
-              <span>0</span><span>max {maxUse} (2,000₮ хүртэл)</span>
-            </div>
-          </div>
-          <div className="mt-3 border-t pt-3 flex justify-between items-center">
+          <div className="flex justify-between items-center">
             <span className="font-bold">{isEbook ? "QPay-ээр төлөх" : "Бэлнээр төлөх"}</span>
             <span className="text-2xl font-extrabold text-navy">{cash.toLocaleString()}₮</span>
           </div>
@@ -256,13 +236,13 @@ export default function CheckoutPage() {
           className="mt-4 w-full rounded-xl bg-sage px-5 py-3.5 font-extrabold text-white hover:brightness-95 disabled:opacity-50">
           {busy ? "Боловсруулж байна..." : isEbook
             ? method === "qpay"
-              ? `QPay QR үүсгэх — ${cash.toLocaleString()}₮ + ${clamped} кр`
-              : `Шилжүүлэг эхлүүлэх — ${cash.toLocaleString()}₮ + ${clamped} кр`
-            : `Захиалах — ${cash.toLocaleString()}₮ + ${clamped} кр`}
+              ? `QPay QR үүсгэх — ${cash.toLocaleString()}₮`
+              : `Шилжүүлэг эхлүүлэх — ${cash.toLocaleString()}₮`
+            : `Захиалах — ${cash.toLocaleString()}₮`}
         </button>
         {isEbook && (
           <p className="mt-2 text-[11px] text-slate-400 text-center">
-            QPay sandbox тест орчин. Төлсний дараа e-barimt автоматаар үүснэ.
+            Төлсний дараа e-barimt автоматаар үүснэ.
           </p>
         )}
       </div>

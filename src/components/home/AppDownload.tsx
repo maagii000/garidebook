@@ -12,7 +12,7 @@ const STEPS = [
   {
     n: "3",
     title: "Нэвтрээд эхлэх",
-    text: "Google-ээр нэвтрээд +120 кредитээ аваарай",
+    text: "Google-ээр нэвтрээд эхлээрэй",
   },
 ];
 
@@ -23,7 +23,7 @@ export default function AppDownload() {
         Хүссэн газраа хүссэн цагтаа хямд ном ав
       </h2>
       <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-        Автобусанд суугаад, гэртээ тухлаад — утаснаасаа P2P зараа оруулж, кредитээ шалга.
+        Автобусанд суугаад, гэртээ тухлаад — утаснаасаа зараа оруулж, худалдан авалтаа шалга.
         Вэб апп утсан дээр бүрэн ажиллана:
       </p>
       <div className="mx-auto mt-5 grid max-w-3xl gap-3 md:grid-cols-3 text-left">

@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, unauthorized } from "@/lib/api-auth";
 import { createInvoice } from "@/lib/qpay";
-import { fulfillPayment, cashAfterCredit, PAYMENT_PURPOSES, PURPOSE_LABEL } from "@/lib/payments";
+import { PAYMENT_PURPOSES, PURPOSE_LABEL } from "@/lib/payments";
 import { bankInfo } from "@/lib/bank";
-import { MAX_CREDIT_USE_PER_ORDER } from "@/lib/types";
 
 function originOf(req: NextRequest) {
   const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "blackup.ink";
@@ -12,12 +11,12 @@ function originOf(req: NextRequest) {
   return `${proto}://${host}`;
 }
 
-// POST /api/payments { bookId, creditToUse, method } → номын төлбөр (BOOK)
-// POST /api/payments { purpose: UPLOAD_FEE|AD_FEE|MEMBERSHIP, refId?, amount, description?, method } → хураамж/гишүүнчлэл
+// POST /api/payments { bookId, method } → номын төлбөр (BOOK)
+// POST /api/payments { purpose, refId?, amount, description?, method } → хураамж/гишүүнчлэл
 export async function POST(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
-  const { bookId, creditToUse, method, purpose, refId, amount, description } = await req.json();
+  const { bookId, method, purpose, refId, amount, description } = await req.json();
 
   // ---- Generic fee / membership payment (номгүй) ----
   if (purpose && purpose !== "BOOK") {
@@ -85,22 +84,15 @@ export async function POST(req: NextRequest) {
   const existing = await db.order.findFirst({ where: { bookId, buyerId: me.id, status: "placed" } });
   if (existing && book.pdfPath) return NextResponse.json({ owned: true, orderId: existing.id });
 
-  const allowed = book.allowCredit ? MAX_CREDIT_USE_PER_ORDER : 0;
-  const { use, cash } = cashAfterCredit(book.priceCash, creditToUse, me.credit, allowed);
+  const use = 0;
+  const cash = book.priceCash;
 
   const payment = await db.payment.create({
     data: {
-      buyerId: me.id, bookId, amount: cash, creditSpent: use, status: "PENDING",
+      buyerId: me.id, bookId, amount: cash, creditSpent: 0, status: "PENDING",
       method: method === "transfer" ? "TRANSFER" : "QPAY",
     },
   });
-
-  // Fully covered by credit → fulfill immediately (no payment provider).
-  if (cash <= 0) {
-    const done = await fulfillPayment(payment.id);
-    const fresh = await db.user.findUnique({ where: { id: me.id }, select: { credit: true } });
-    return NextResponse.json({ paid: true, orderId: done.orderId, credit: fresh?.credit ?? 0 });
-  }
 
   // Manual bank transfer → admin confirms later.
   if (method === "transfer") {

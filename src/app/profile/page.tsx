@@ -8,7 +8,7 @@ import BookCard from "@/components/BookCard";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
-  const { credit, txs, orders, wishlistBooks, loading, notify } = useStore();
+  const { orders, wishlistBooks, loading, notify } = useStore();
   const [nickname, setNickname] = useState("");
   const [bio, setBio] = useState("");
   const [school, setSchool] = useState("");
@@ -80,9 +80,9 @@ export default function ProfilePage() {
           )}
         </div>
         <div className="rounded-2xl bg-white/10 px-5 py-4 text-center">
-          <div className="text-xs font-bold text-white/60">КРЕДИТ ҮЛДЭГДЭЛ</div>
-          <div className="text-3xl font-extrabold text-accent">{credit}</div>
-          <div className="text-xs text-white/60">≈ {(credit * 10).toLocaleString()}₮ хөнгөлөлт</div>
+          <div className="text-xs font-bold text-white/60">ХАДГАЛСАН НОМ</div>
+          <div className="text-3xl font-extrabold text-accent">{wishlistBooks.length}</div>
+          <div className="text-xs text-white/60">Хүслийн жагсаалт</div>
         </div>
       </div>
 
@@ -153,29 +153,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      <div className="mt-6 grid md:grid-cols-2 gap-5">
-        <div className="rounded-3xl border bg-white p-5">
-          <h2 className="font-extrabold text-navy">Кредит түүх</h2>
-          <div className="mt-3 space-y-2 max-h-80 overflow-auto">
-            {txs.length === 0 && <div className="text-sm text-slate-500">Түүх хоосон байна.</div>}
-            {txs.map((t) => (
-              <div key={t.id} className="flex justify-between gap-3 rounded-xl bg-paper border px-3.5 py-2.5 text-sm">
-                <div>
-                  <div className="font-bold">{t.reason}</div>
-                  {t.bookTitle && <div className="text-xs text-slate-500">{t.bookTitle}</div>}
-                  <div className="text-[11px] text-slate-400">{String(t.createdAt).slice(0, 10)}</div>
-                </div>
-                <span className={`font-extrabold ${t.amount >= 0 ? "text-sage" : "text-red-500"}`}>
-                  {t.amount >= 0 ? "+" : ""}{t.amount}
-                </span>
-              </div>
-            ))}
-          </div>
-          <Link href="/books/new" className="mt-4 block text-center rounded-xl bg-accent px-4 py-3 font-bold text-white hover:bg-accent-dark">
-            Ном оруулж кредит нэмэх
-          </Link>
-        </div>
-
+      <div className="mt-6">
         <div className="rounded-3xl border bg-white p-5">
           <h2 className="font-extrabold text-navy">Миний захиалгууд ({orders.length})</h2>
           <div className="mt-3 space-y-2 max-h-80 overflow-auto">
@@ -184,7 +162,7 @@ export default function ProfilePage() {
               <div key={o.id} className="rounded-xl bg-paper border px-3.5 py-2.5 text-sm">
                 <div className="font-bold">{o.bookTitle}</div>
                 <div className="text-xs text-slate-500">
-                  Бэлэн: {o.cashPaid.toLocaleString()}₮ • Кредит: {o.creditSpent} • {String(o.createdAt).slice(0, 10)}
+                  Бэлэн: {o.cashPaid.toLocaleString()}₮ • {String(o.createdAt).slice(0, 10)}
                 </div>
               </div>
             ))}

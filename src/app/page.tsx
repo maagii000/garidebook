@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useStore } from "@/lib/store";
 import BookRail from "@/components/BookRail";
 import { Reveal } from "@/components/Reveal";
 import Hero from "@/components/home/Hero";
 import StudioShowcase from "@/components/home/StudioShowcase";
-import CreditService from "@/components/home/CreditService";
 import Testimonials from "@/components/home/Testimonials";
 import AppDownload from "@/components/home/AppDownload";
-import { Book, CREDIT_TO_MNT, MAX_CREDIT_USE_PER_ORDER } from "@/lib/types";
+import { Book } from "@/lib/types";
 import { getRecent } from "@/lib/recent";
 
 export default function Home() {
@@ -26,10 +25,6 @@ export default function Home() {
   const p2p = useMemo(() => active.filter((b) => b.source !== "official").slice(0, 10), [active]);
   const official = useMemo(() => active.filter((b) => b.source === "official").slice(0, 10), [active]);
   const topRated = useMemo(() => [...active].sort((a, b) => b.avgRating - a.avgRating).slice(0, 10), [active]);
-  const cheapWithCredit = useMemo(
-    () => [...active].sort((a, b) => a.priceCash - MAX_CREDIT_USE_PER_ORDER * CREDIT_TO_MNT - (b.priceCash - MAX_CREDIT_USE_PER_ORDER * CREDIT_TO_MNT)).slice(0, 10),
-    [active]
-  );
   const recent = useMemo(
     () => recentIds
       .map((rid) => active.find((b) => b.id === rid))
@@ -51,12 +46,11 @@ export default function Home() {
     return {
       recent: rRecent,
       fresh: { total: fresh.length, books: pick(fresh) },
-      cheap: { total: cheapWithCredit.length, books: pick(cheapWithCredit) },
       p2p: { total: p2p.length, books: pick(p2p) },
       official: { total: official.length, books: pick(official) },
       top: { total: topRated.length, books: pick(topRated) },
     };
-  }, [recent, fresh, cheapWithCredit, p2p, official, topRated]);
+  }, [recent, fresh, p2p, official, topRated]);
 
   return (
     <div className="pb-10">
@@ -71,13 +65,13 @@ export default function Home() {
               Одоогоор ном алга — эхнийх нь чийгээч?
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              Номын зургаа оруулаад шууд +60~120 кредит авна.
+              Тун удахгүй шинэ номууд нэмэгдэнэ.
             </p>
             <Link
-              href="/books/new"
+              href="/catalog"
               className="mt-5 inline-flex rounded-full bg-accent px-6 py-3 text-sm font-extrabold text-white hover:bg-accent-dark"
             >
-              Эхний номоо оруулах
+              Каталоги үзэх
             </Link>
           </div>
         </div>
@@ -86,11 +80,6 @@ export default function Home() {
           <StudioShowcase books={fresh} />
         </Reveal>
       )}
-
-      {/* 2. Кредит үйлчилгээ */}
-      <Reveal>
-        <CreditService />
-      </Reveal>
 
       {/* 3. Rails */}
       <div className="mx-auto max-w-7xl px-4">
@@ -103,12 +92,12 @@ export default function Home() {
           />
         )}
         <BookRail
-          title="Кредитээр хамгийн хямд"
-          subtitle={`200кр ашиглавал −${(MAX_CREDIT_USE_PER_ORDER * CREDIT_TO_MNT).toLocaleString()}₮ хямдарна`}
+          title="Шинээр нэмэгдсэн"
+          subtitle="Хамгийн сүүлд орсон номууд"
           href="/catalog"
-          books={rails.cheap.books}
-          totalCount={rails.cheap.total}
-          badge="−2,000₮"
+          books={rails.fresh.books}
+          totalCount={rails.fresh.total}
+          badge="NEW"
         />
         <BookRail
           title="Сурагчдын P2P зарууд"
@@ -145,7 +134,7 @@ export default function Home() {
             <div className="flex-1">
               <div className="text-xs font-extrabold uppercase tracking-widest text-white/50">Positive орчин</div>
               <div className="mt-1 text-xl md:text-2xl font-extrabold">Өнөөдрийн нойроо бүртгэсэн үү?</div>
-              <p className="mt-1 text-sm text-white/60">Циркад хэмнэлээ хянаж, өдөр бүр +5 кредит аваарай.</p>
+              <p className="mt-1 text-sm text-white/60">Циркад хэмнэлээ хянаарай.</p>
             </div>
             <Link href="/wellness" className="shrink-0 rounded-full bg-white px-6 py-3 text-sm font-extrabold text-black hover:bg-gray-100 text-center">
               Нойр бүртгэх →
@@ -165,9 +154,9 @@ export default function Home() {
           <h2 className="text-lg md:text-xl font-extrabold text-slate-900">Яагаад Level Up Hub?</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             {[
-              ["Хямд ав", "Суурь 5,000₮ — кредитээр 3,000₮ хүртэл хямдарна.", "bg-emerald-50 border-emerald-100"],
-              ["Кредит цуглуул", "Уншсан номоо оруулаад +60~120 кредит авна.", "bg-orange-50 border-orange-100"],
-              ["Солилцож эргэлтэд оруул", "Гэрт ашиглагддаггүй номоо сурагчдад хүргэ.", "bg-indigo-50 border-indigo-100"],
+              ["Хямд ном", "Албан ёсны баталгаат нөөцөөс шууд аваарай.", "bg-emerald-50 border-emerald-100"],
+              ["Мэдлэгээ тэл", "Сорил, лекцээ хуваалцаж орлого олоорой.", "bg-orange-50 border-orange-100"],
+              ["Хамтдаа хөгж", "Чатлаж, хосоороо суралцаж, нойроо хянаарай.", "bg-indigo-50 border-indigo-100"],
             ].map(([t, d, c]) => (
               <div key={t} className={`rounded-2xl border p-5 bg-white ${c}`}>
                 <div className="font-extrabold text-sm">{t}</div>
