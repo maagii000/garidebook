@@ -20,6 +20,19 @@ interface PayRow {
   status: string; method: string; qpayInvoiceId: string | null; qpayPaymentId: string | null;
   ebarimtId: string | null; orderId: string | null; createdAt: string;
 }
+interface UserDetail {
+  user: {
+    id: string; name: string | null; email: string | null; nickname: string | null;
+    lastName: string; firstName: string; birthDate: string; age: number | null;
+    school: string; bio: string; interests: string; lookingFor: string;
+    role: string; plan: string | null; planEnds: string | null; createdAt: string;
+  };
+  stats: { orders: number; reviews: number; matches: number; messages: number; sleepStreak: number; materials: number; ads: number };
+  orders: { id: string; bookTitle: string; cashPaid: number; createdAt: string }[];
+  payments: { id: string; amount: number; purpose: string; status: string; method: string; createdAt: string }[];
+  materials: { id: string; title: string; status: string; price: number }[];
+  ads: { id: string; title: string; status: string; price: number }[];
+}
 
 export default function AdminPage() {
   const { books, adminSetStatus, notify, refreshAll } = useStore();
@@ -32,6 +45,9 @@ export default function AdminPage() {
   const [pendingMaterials, setPendingMaterials] = useState<PendingMaterial[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [userQ, setUserQ] = useState("");
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<UserDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [aiStats, setAiStats] = useState<{ total: number; byBook: { bookId: string; title: string; count: number }[] }>({ total: 0, byBook: [] });
 
   // add-book form
@@ -71,6 +87,38 @@ export default function AdminPage() {
   useEffect(load, [books]);
 
   function set(id: string, s: BookStatus) { adminSetStatus(id, s); }
+
+  function openUser(id: string) {
+    setDetailId(id);
+    setDetail(null);
+    setDetailLoading(true);
+    fetch(`/api/admin/users/${id}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.user) setDetail(d);
+        setDetailLoading(false);
+      })
+      .catch(() => setDetailLoading(false));
+  }
+
+  function closeUser() {
+    setDetailId(null);
+    setDetail(null);
+  }
+
+  async function setUserRole(id: string, role: "USER" | "ADMIN") {
+    if (!confirm(role === "ADMIN" ? "Админ эрх олгох уу?" : "Админ эрхийг хасах уу?")) return;
+    const r = await fetch(`/api/admin/users/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role }),
+    });
+    const d = await r.json();
+    if (!r.ok) { notify(d.error || "Алдаа", "err"); return; }
+    notify(role === "ADMIN" ? "Админ болголоо" : "Хэрэглэгч болголоо");
+    setDetail((p) => (p ? { ...p, user: { ...p.user, role } } : p));
+    setUsers((p) => p.map((u) => (u.id === id ? { ...u, role } : u)));
+  }
 
   async function setAd(id: string, s: "active" | "rejected") {    const r = await fetch(`/api/ads/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
@@ -418,8 +466,11 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {users.map((u) => (
-                  <tr key={u.id} className="border-b last:border-0 align-top">
-                    <td className="p-3">
+                  <tr
+                    key={u.id}
+                    onClick={() => openUser(u.id)}
+                    className="border-b last:border-0 align-top cursor-pointer hover:bg-blue-50/50 transition-colors"
+                  >  <td className="p-3">
                       <div className="font-bold">
                         {[u.lastName, u.firstName].filter(Boolean).join(" ") || u.nickname || u.name || "—"}
                       </div>
@@ -452,6 +503,146 @@ export default function AdminPage() {
           {users.length === 0 && (
             <div className="mt-3 text-sm text-slate-500">Хэрэглэгч олдсонгүй.</div>
           )}
+        </div>
+      )}
+
+      {/* Хэрэглэгчийн дэлгэрэнгүй drawer */}
+      {detailId && (
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/40" onClick={closeUser} />
+          <div className="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl overflow-y-auto animate-scale-up">
+            <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+              <h3 className="font-extrabold text-black">Хэрэглэгчийн мэдээлэл</h3>
+              <button onClick={closeUser} className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-bold text-slate-600" aria-label="хаах">
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              {detailLoading || !detail ? (
+                <div className="py-16 text-center text-sm text-slate-400">Ачааллаж байна...</div>
+              ) : (
+                <div className="space-y-5">
+                  <div className="flex items-start gap-4">
+                    <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand/10 text-brand text-xl font-extrabold">
+                      {(detail.user.nickname || detail.user.lastName || detail.user.name || "Х").slice(0, 1).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-lg font-extrabold text-black truncate">
+                        {[detail.user.lastName, detail.user.firstName].filter(Boolean).join(" ") || detail.user.nickname || detail.user.name || "—"}
+                      </div>
+                      <div className="text-xs text-slate-500 break-all">{detail.user.email ?? "—"}</div>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {detail.user.nickname && (
+                          <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-bold">@{detail.user.nickname}</span>
+                        )}
+                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-extrabold ${detail.user.role === "ADMIN" ? "bg-black text-white" : "bg-gray-100"}`}>
+                          {detail.user.role === "ADMIN" ? "Админ" : "Хэрэглэгч"}
+                        </span>
+                        {detail.user.plan && (
+                          <span className="rounded-full bg-brand px-2.5 py-0.5 text-[11px] font-extrabold text-white">{detail.user.plan}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {[
+                      ["Нас", detail.user.age !== null ? `${detail.user.age}` : "—"],
+                      ["Төрсөн өдөр", detail.user.birthDate || "—"],
+                      ["Сургууль", detail.user.school || "—"],
+                      ["Хайж буй", detail.user.lookingFor === "business" ? "Business" : "Study"],
+                      ["Бүртгүүлсэн", String(detail.user.createdAt).slice(0, 10)],
+                      ["Багц дуусах", detail.user.planEnds ? String(detail.user.planEnds).slice(0, 10) : "—"],
+                    ].map(([l, v]) => (
+                      <div key={l} className="rounded-xl bg-[#F5F5F7] border border-gray-100 px-3.5 py-2.5">
+                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{l}</div>
+                        <div className="font-bold text-black truncate">{v}</div>
+                      </div>
+                    ))}
+                    <div className="col-span-2 rounded-xl bg-[#F5F5F7] border border-gray-100 px-3.5 py-2.5">
+                      <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Танилцуулга</div>
+                      <div className="text-sm text-slate-700">{detail.user.bio || "—"}</div>
+                    </div>
+                    <div className="col-span-2 rounded-xl bg-[#F5F5F7] border border-gray-100 px-3.5 py-2.5">
+                      <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Сонирхол</div>
+                      <div className="text-sm text-slate-700">{detail.user.interests || "—"}</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2">Үйл ажиллагаа</div>
+                    <div className="grid grid-cols-4 gap-2 text-center">
+                      {[
+                        ["Захиалга", detail.stats.orders],
+                        ["Ревью", detail.stats.reviews],
+                        ["Match", detail.stats.matches],
+                        ["Мессеж", detail.stats.messages],
+                        ["Материал", detail.stats.materials],
+                        ["Зар", detail.stats.ads],
+                        ["Streak", `${detail.stats.sleepStreak}өд`],
+                      ].map(([l, v]) => (
+                        <div key={l} className="rounded-xl bg-[#F5F5F7] border border-gray-100 px-2 py-2.5">
+                          <div className="text-base font-extrabold text-black">{v}</div>
+                          <div className="text-[10px] text-slate-500 font-bold">{l}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {detail.orders.length > 0 && (
+                    <div>
+                      <div className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2">Сүүлийн захиалгууд</div>
+                      <div className="space-y-1.5">
+                        {detail.orders.map((o) => (
+                          <div key={o.id} className="flex justify-between gap-2 rounded-xl border border-gray-100 px-3 py-2 text-xs">
+                            <span className="font-bold truncate">{o.bookTitle}</span>
+                            <span className="text-slate-500 shrink-0">{o.cashPaid.toLocaleString()}₮</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {detail.payments.length > 0 && (
+                    <div>
+                      <div className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2">Сүүлийн төлбөрүүд</div>
+                      <div className="space-y-1.5">
+                        {detail.payments.map((p) => (
+                          <div key={p.id} className="flex justify-between gap-2 rounded-xl border border-gray-100 px-3 py-2 text-xs">
+                            <span className="font-bold truncate">{p.purpose}</span>
+                            <span className="shrink-0">
+                              <span className={`font-extrabold ${p.status === "PAID" ? "text-emerald-600" : "text-slate-400"}`}>
+                                {p.amount.toLocaleString()}₮
+                              </span>{" "}
+                              <span className="text-slate-400">{p.status}</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-1">
+                    {detail.user.role === "ADMIN" ? (
+                      <button
+                        onClick={() => setUserRole(detail.user.id, "USER")}
+                        className="flex-1 rounded-xl border border-red-200 text-red-600 px-4 py-2.5 text-sm font-bold hover:bg-red-50"
+                      >
+                        Админ эрх хасах
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setUserRole(detail.user.id, "ADMIN")}
+                        className="flex-1 rounded-xl bg-black px-4 py-2.5 text-sm font-bold text-white hover:bg-gray-800"
+                      >
+                        Админ эрх олгох
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
