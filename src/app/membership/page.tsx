@@ -182,11 +182,6 @@ export default function MembershipPage() {
           <div className="pt-8">
           {plan === "PRO" ? (
             <div className="w-full py-3.5 rounded-2xl bg-gray-100 text-gray-400 font-semibold text-center">Идэвхтэй байна</div>
-          ) : firstTimer ? (
-            <button onClick={() => claimTrial("PRO")} disabled={busy}
-              className="w-full py-3.5 rounded-2xl bg-brand text-white font-semibold hover:bg-brand-dark shadow-md transition-all disabled:opacity-50">
-              {busy ? "Идэвхжүүлж байна..." : "Эхний сар үнэгүй турших"}
-            </button>
           ) : (
             <button
               onClick={() => { if (!session) { router.push("/login"); return; } setPayFor("PRO"); }}

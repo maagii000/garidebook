@@ -30,8 +30,7 @@ export async function GET() {
 }
 
 // POST /api/membership { plan, trial? } | { plan, paymentId }
-// trial: анхны хэрэглэгч — 30 хоног үнэгүй
-// paymentId: MEMBERSHIP PAID төлбөрөөр эрх сунгах/авах (30 хоног)
+// trial: анхны хэрэглэгч — 30 хоног үнэгүй (зөвхөн BASE)
 export async function POST(req: NextRequest) {
   const me = await requireUser();
   if (!me) return unauthorized();
@@ -41,6 +40,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (trial) {
+    if (plan !== "BASE") {
+      return NextResponse.json({ error: "Эхний сар үнэгүй зөвхөн Base багцад" }, { status: 400 });
+    }
     const ever = await db.membership.findFirst({ where: { userId: me.id }, select: { id: true } });
     if (ever) return NextResponse.json({ error: "Үнэгүй сар нэг удаа" }, { status: 400 });
     const m = await db.membership.create({
@@ -62,6 +64,11 @@ export async function POST(req: NextRequest) {
     pay.status !== "PAID" || pay.amount < expected
   ) {
     return NextResponse.json({ error: "Эхлээд төлбөр төлнө үү" }, { status: 402 });
+  }
+  // Idempotent: admin/автомат баталгаа аль хэдийн эрх үүсгэсэн бол давхардуулахгүй.
+  if (pay.refId) {
+    const existing = await db.membership.findUnique({ where: { id: pay.refId } });
+    if (existing) return NextResponse.json({ ok: true, membership: { plan: existing.plan, endsAt: existing.endsAt }, reused: true });
   }
 
   const base = (await current(me.id))?.endsAt ?? new Date();
