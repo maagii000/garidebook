@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
-import { Reveal } from "@/components/Reveal";
+import { Reveal, CountUp } from "@/components/Reveal";
 
 // Инфографикаас: цаг → биеийн төлөв
 const PHASES: { h: number; m: number; label: string; desc: string }[] = [
@@ -64,7 +64,7 @@ function dayStr(d: Date) {
 export default function WellnessPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { notify } = useStore();
+  const { notify, refreshAll } = useStore();
   const [plan, setPlan] = useState<string | null>(null);
   const [planChecked, setPlanChecked] = useState(false);
   const [logs, setLogs] = useState<Log[]>([]);
@@ -77,7 +77,7 @@ export default function WellnessPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 30000);
+    const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
 
@@ -107,7 +107,7 @@ export default function WellnessPage() {
   }, [status]);
 
   const phase = useMemo(() => phaseAt(now), [now]);
-  const nowAngle = (now.getHours() * 60 + now.getMinutes()) / 1440;
+  const nowDeg = ((now.getHours() * 60 + now.getMinutes()) / 1440) * 360 + now.getSeconds() / 60;
 
   async function save() {
     setSaving(true);
@@ -119,10 +119,13 @@ export default function WellnessPage() {
     const d = await r.json();
     setSaving(false);
     if (!r.ok) { notify(d.error || "Алдаа", "err"); return; }
-    notify(`${d.log.hours} цаг нойр бүртгэгдлээ`);
+    notify(d.earned > 0 ? `${d.log.hours} цаг бүртгэгдлээ +${d.earned} кредит` : `${d.log.hours} цаг бүртгэгдлээ`);
+    refreshAll(true);
     const l = await fetch("/api/sleep").then((x) => x.json()).catch(() => null);
     if (l) { setLogs(l.logs ?? []); setStreak(l.streak ?? 0); }
   }
+
+  const loggedToday = logs.some((l) => l.date === dayStr(new Date()));
 
   if (status === "loading" || !planChecked) {
     return <div className="mx-auto max-w-7xl px-4 py-16 text-center text-sm text-slate-400">Ачааллаж байна...</div>;
@@ -169,17 +172,23 @@ export default function WellnessPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-gray-200 pb-6">
+      <Reveal className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-gray-200 pb-6">
         <div>
           <h2 className="text-3xl font-extrabold text-black tracking-tight">Positive орчин</h2>
           <p className="text-sm text-slate-500 mt-1">Нойрны циркад хэмнэлээ хянаж, сэргэг бай</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 border border-orange-100 text-sm font-bold text-accent-dark w-fit">
-          <span>{streak} өдөр дараалан</span>
+          <CountUp to={streak} suffix=" өдөр дараалан" />
         </div>
-      </div>
+      </Reveal>
 
       <div className="grid lg:grid-cols-2 gap-6 mt-6">
+        {logs.length > 0 && !loggedToday && (
+          <div className="lg:col-span-2 rounded-2xl border border-blue-100 bg-blue-50/60 px-5 py-3.5 text-sm flex flex-wrap items-center gap-2">
+            <span className="font-bold text-black">Өнөөдрийн нойроо бүртгэж +5 кредит аваарай.</span>
+            <span className="text-slate-500">Доорх формоор 1 минутад.</span>
+          </div>
+        )}
         {/* Циркад цаг — dark wheel */}
         <Reveal className="rounded-[2rem] bg-[#0A1628] text-white p-6 md:p-8 relative overflow-hidden">
           <div className="text-xs font-extrabold uppercase tracking-widest text-white/50">Хоногийн хэмнэл — одоо</div>
@@ -209,19 +218,12 @@ export default function WellnessPage() {
                   </g>
                 );
               })}
-              {/* одоогийн цаг */}
-              {(() => {
-                const a = nowAngle * Math.PI * 2 - Math.PI / 2;
-                const x = 160 + Math.cos(a) * 118;
-                const y = 160 + Math.sin(a) * 118;
-                return (
-                  <g>
-                    <line x1="160" y1="160" x2={x} y2={y} stroke="#F97316" strokeWidth="2.5" strokeLinecap="round" />
-                    <circle cx={x} cy={y} r="6" fill="#F97316" />
-                    <circle cx={x} cy={y} r="10" fill="none" stroke="#F97316" strokeWidth="1" opacity="0.5" />
-                  </g>
-                );
-              })()}
+              {/* одоогийн цаг — зүү секунд тутамд зөөлөн гулсана */}
+              <g style={{ transform: `rotate(${nowDeg}deg)`, transformOrigin: "160px 160px", transition: "transform 1s linear" }}>
+                <line x1="160" y1="160" x2="160" y2="42" stroke="#F97316" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="160" cy="42" r="6" fill="#F97316" />
+                <circle cx="160" cy="42" r="10" fill="none" stroke="#F97316" strokeWidth="1" opacity="0.5" />
+              </g>
               <circle cx="160" cy="160" r="52" fill="rgba(255,255,255,0.08)" />
               <text x="160" y="152" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="800">ХОНОГИЙН</text>
               <text x="160" y="170" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="800">ХЭМНЭЛ</text>
@@ -273,18 +275,25 @@ export default function WellnessPage() {
           </Reveal>
 
           <Reveal delay={100} className="glass-card rounded-3xl p-6 md:p-8">
-            <h3 className="text-xl font-extrabold text-black">Сүүлийн 7 хоног</h3>
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className="text-xl font-extrabold text-black">Сүүлийн 7 хоног</h3>
+              {week.length > 0 && (
+                <span className="text-xs font-bold text-slate-500">
+                  Дундаж {(week.reduce((s, l) => s + l.hours, 0) / week.length).toFixed(1)}ц
+                </span>
+              )}
+            </div>
             {week.length === 0 ? (
               <p className="mt-3 text-sm text-slate-500">Бүртгэл алга — дээрээс эхлээрэй.</p>
             ) : (
               <div className="mt-4 flex items-end gap-2 h-32">
-                {week.map((l) => (
+                {week.map((l, i) => (
                   <div key={l.date} className="flex-1 flex flex-col items-center gap-1">
                     <span className="text-[10px] font-bold text-slate-500">{l.hours}ц</span>
                     <div className="w-full rounded-lg bg-gray-100 relative" style={{ height: "100%" }}>
                       <div
-                        className={`absolute bottom-0 w-full rounded-lg ${l.hours >= 7 && l.hours <= 9 ? "bg-emerald-500" : l.hours >= 5 ? "bg-brand" : "bg-red-400"}`}
-                        style={{ height: `${Math.min(100, (l.hours / 10) * 100)}%` }}
+                        className={`animate-bar-grow absolute bottom-0 w-full rounded-lg ${l.hours >= 7 && l.hours <= 9 ? "bg-emerald-500" : l.hours >= 5 ? "bg-brand" : "bg-red-400"}`}
+                        style={{ height: `${Math.min(100, (l.hours / 10) * 100)}%`, animationDelay: `${i * 80}ms` }}
                       />
                     </div>
                     <span className="text-[10px] text-slate-400">{l.date.slice(5)}</span>

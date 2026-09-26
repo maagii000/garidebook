@@ -60,8 +60,23 @@ export async function POST(req: NextRequest) {
     update: { bedMin: b, wakeMin: w, quality: q },
     create: { userId: me.id, date, bedMin: b, wakeMin: w, quality: q },
   });
+  // Өдөрт 1 удаа +5 кредит урамшуулал
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const already = await db.creditTx.count({
+    where: { userId: me.id, reason: { startsWith: "Нойр бүртгэсэн" }, createdAt: { gte: todayStart } },
+  });
+  let earned = 0;
+  if (!already) {
+    earned = 5;
+    await db.creditTx.create({
+      data: { userId: me.id, amount: 5, reason: "Нойр бүртгэсэн +5" },
+    });
+    await db.user.update({ where: { id: me.id }, data: { credit: { increment: 5 } } });
+  }
   return NextResponse.json({
     ok: true,
+    earned,
     log: { date: row.date, hours: Math.round((duration(b, w) / 60) * 10) / 10 },
   });
 }

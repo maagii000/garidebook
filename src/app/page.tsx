@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useStore } from "@/lib/store";
 import BookRail from "@/components/BookRail";
 import { Reveal } from "@/components/Reveal";
@@ -15,6 +16,7 @@ import { getRecent } from "@/lib/recent";
 
 export default function Home() {
   const { books } = useStore();
+  const { status } = useSession();
   const [recentIds] = useState<string[]>(() =>
     typeof window === "undefined" ? [] : getRecent()
   );
@@ -135,6 +137,22 @@ export default function Home() {
       <Reveal>
         <Testimonials />
       </Reveal>
+
+      {/* Нойр CTA — нэвтэрсэн хэрэглэгчдэд */}
+      {status === "authenticated" && (
+        <div className="mx-auto max-w-7xl px-4">
+          <Reveal className="mt-10 rounded-[2rem] bg-[#0A1628] text-white p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-4 relative overflow-hidden">
+            <div className="flex-1">
+              <div className="text-xs font-extrabold uppercase tracking-widest text-white/50">Positive орчин</div>
+              <div className="mt-1 text-xl md:text-2xl font-extrabold">Өнөөдрийн нойроо бүртгэсэн үү?</div>
+              <p className="mt-1 text-sm text-white/60">Циркад хэмнэлээ хянаж, өдөр бүр +5 кредит аваарай.</p>
+            </div>
+            <Link href="/wellness" className="shrink-0 rounded-full bg-white px-6 py-3 text-sm font-extrabold text-black hover:bg-gray-100 text-center">
+              Нойр бүртгэх →
+            </Link>
+          </Reveal>
+        </div>
+      )}
 
       {/* 5. Апп татах */}
       <Reveal>

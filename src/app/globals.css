@@ -118,6 +118,14 @@ input[type="range"].credit-range {
 .animate-scale-up {
   animation: scale-up 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+@keyframes bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.animate-bar-grow {
+  transform-origin: bottom;
+  animation: bar-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 ::selection {
   background: #0071e3;
   color: #fff;
